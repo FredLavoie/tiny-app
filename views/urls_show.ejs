@@ -9,20 +9,10 @@
   <title>TinyApp</title>
 </head>
 <body style="font-size:20px; padding:50px;">
-
   <h1>TinyApp</h1>
-  <br>
-  <ul>
-    <% let arrayOfURLs = Object.keys(urls) %>
+  <a href="#">Create New TinyURL</a>
+  <h3>Tiny URL for <%= longURL %></h3>
+  <H5><%= shortURL %></H5>  
     
-
-    <% arrayOfURLs.forEach(function(link) { %>
-      <li><%= link %> - <%= urls[link] %></li>
-    <% }); %>
-  </ul>
-
-
-
-
 </body>
 </html>
