@@ -17,19 +17,11 @@ app.listen(PORT, () => {
   console.log(`tiny-app listening on port ${PORT}`);
 });
 
-app.get("/", (request, response) => {
-  response.send("Hello!");
-});
-
 app.get("/urls.json", (request, response) => {
   response.json(urlDatabase);
 });
 
-app.get("/hello", (request, response) => {
-  response.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
-app.get("/urls", (request, response) => {
+app.get("/", (request, response) => {
   let templateVars = { urls: urlDatabase };  
   response.render("urls_index", templateVars);
 });
@@ -44,10 +36,17 @@ app.get("/urls/:shortURL", (request, response) => {
 });
 
 app.post("/urls", (request, response) => {
-  console.log(request.body);  // Log the POST request body to the console
-  response.send("Ok");         // Respond with 'Ok' (we will replace this)
+  let item = generateRandomString();
+  urlDatabase[item] = request.body.longURL;
+  response.send(urlDatabase);
+});
+
+app.get("/u/:shortURL", (request, response) => {
+  const longURL = request.params.shortURL;
+  response.redirect("urls_index");
+  // response.redirect(urlDatabase[longURL]);
 });
 
 function generateRandomString() {
-  return (Math.random() * 6).toString(64).substring(6);
+  return (Math.random() * 6).toString(36).substring(6);
 }
