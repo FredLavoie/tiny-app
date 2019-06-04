@@ -10,18 +10,24 @@ let urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
+app.get("/", (request, response) => {
+  response.send("Hello!");
 });
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`tiny-app listening on port ${PORT}`);
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+app.get("/urls.json", (request, response) => {
+  response.json(urlDatabase);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
+app.get("/hello", (request, response) => {
+  response.send("<html><body>Hello <b>World</b></body></html>\n");
+});
+
+
+app.get("/urls", (request, response) => {
+  let templateVars = { urls: urlDatabase };
+  response.render("urls_index", templateVars);
 });
