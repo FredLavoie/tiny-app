@@ -10,8 +10,13 @@
 </head>
 <body style="font-size:20px; padding:50px;">
 
-  <h1>TinyApp</h1>
-  <br>
+  <header>
+    <% include ./partials/_header %>
+  </header>
+
+  <a href="#">Create New TinyURL</a>
+
+  <h3>My URLs</h3>
   <ul>
     <% let arrayOfURLs = Object.keys(urls) %>
     
@@ -20,9 +25,6 @@
       <li><%= link %> - <%= urls[link] %></li>
     <% }); %>
   </ul>
-
-
-
 
 </body>
 </html>
