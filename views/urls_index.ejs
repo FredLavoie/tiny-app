@@ -10,5 +10,18 @@
 </head>
 <body style="font-size:20px; padding:50px;">
     <!-- Add EJS code here -->
+
+  <ul>
+    <% let arrayOfURLs = Object.keys(urls) %>
+    
+
+    <% arrayOfURLs.forEach(function(link) { %>
+      <li><%= link %> - <%= urls[link] %></li>
+    <% }); %>
+  </ul>
+
+
+
+
 </body>
 </html>

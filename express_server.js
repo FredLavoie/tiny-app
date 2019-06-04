@@ -29,5 +29,7 @@ app.get("/hello", (request, response) => {
 
 app.get("/urls", (request, response) => {
   let templateVars = { urls: urlDatabase };
+  console.log(templateVars);
+  
   response.render("urls_index", templateVars);
 });
