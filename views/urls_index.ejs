@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
     <title>TinyApp</title>
   </head>
-  
+
   <body style="font-size:20px; padding:50px;">
 
     <header>
@@ -23,10 +23,10 @@
       <% let arrayOfURLs = Object.keys(urls) %>
       <% arrayOfURLs.forEach(function(link) { %>
         <li><%= link %> - <%= urls[link] %></li>
-        <form method="POST" action="/urls/<%= link %>/delete">
-          <button type="delete" class="btn btn-danger">Delete</button>
-          <a href="/urls/<%=link %>" style="font-size:15px;">Edit/Show</a>
-        </form>
+        <form method="POST" action="/urls/<%= link %>/delete"></form>
+        <a href="/urls/<%=link %>" style="font-size:15px;">Edit/Show</a>
+        <button type="delete" class="btn btn-danger btn-sm">Delete</button>
+         
       <% }); %>
     </ul>
 

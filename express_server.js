@@ -33,7 +33,6 @@ app.listen(PORT, () => {
 app.get("/urls", (request, response) => {
   let username = request.cookies["username"];
   let templateVars = { urls: urlDatabase, username: username }; 
-  console.log(templateVars);
   response.render("urls_index", templateVars);
 });
 
