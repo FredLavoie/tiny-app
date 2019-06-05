@@ -1,37 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-  <title>TinyApp</title>
-</head>
-<body style="font-size:20px; padding:50px;">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <title>TinyApp</title>
+  </head>
+  
+  <body style="font-size:20px; padding:50px;">
 
     <header>
-        <% include ./partials/_header %>
-      </header>
+      <% include ./partials/_header %>
+    </header>
 
-  <a href="/urls/new" style="font-size:15px;">Create New TinyURL</a>
-  
-  <h3>My URLs</h3>
-  <ul>
-    <% let arrayOfURLs = Object.keys(urls) %>
-
-    <% arrayOfURLs.forEach(function(link) { %>
-      <li><%= link %> - <%= urls[link] %></li>
-      <form method="POST" action="/urls/<%= link %>/delete">
-        <button type="delete" class="btn btn-danger">Delete</button>
-        <a href="/urls/<%=link %>" style="font-size:15px;">Edit/Show</a>
-      </form>
-    <% }); %>
+    <a href="/urls/new" style="font-size:15px;">Create New TinyURL</a>
     
-  </ul>
+    <h3>My URLs</h3>
 
-  
+    <ul>
+      <% let arrayOfURLs = Object.keys(urls) %>
+      <% arrayOfURLs.forEach(function(link) { %>
+        <li><%= link %> - <%= urls[link] %></li>
+        <form method="POST" action="/urls/<%= link %>/delete">
+          <button type="delete" class="btn btn-danger">Delete</button>
+          <a href="/urls/<%=link %>" style="font-size:15px;">Edit/Show</a>
+        </form>
+      <% }); %>
+    </ul>
 
-
-</body>
+  </body>
 </html>
