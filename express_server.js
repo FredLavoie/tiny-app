@@ -39,29 +39,48 @@ app.get("/urls/:shortURL", (request, response) => {
   response.render("urls_show", templateVars);
 });
 
-// generates a shorturl upon submitting longurl in form
+// generates a shorturl upon submitting longURL in form
 app.post("/urls", (request, response) => {
   let item = generateRandomString();
   urlDatabase[item] = request.body.longURL;
-  response.send(urlDatabase); 
+  response.redirect("urls/" + item);
+
 });
 
+/****************  not sure what this app.get is doing  *****************/
+/************************************************************************/
 app.get("/u/:shortURL", (request, response) => {
   const longURL = request.params.shortURL;
-  response.redirect(urlDatabase[longURL]);
+  // response.redirect(urlDatabase[longURL]);
+  response.redirect("urls_show",longURL);
 });
 
+// delete entry from urlDatabase object
 app.post("/urls/:shortURL/delete", (request, response) => {
   delete urlDatabase[request.params.shortURL];
   response.redirect("/urls");
 });
-
+// edit entry from urlDatabase object
 app.post("/urls/:shortURL", (request, response) => {
   urlDatabase[request.params.shortURL] = request.body.longURL;
+  response.redirect("/urls");
+});
+
+// create cookie for user name entered by user in form
+app.post("/login", (request, response) => {
+  response.cookie('username', { username: request.body.username });
   response.redirect("/urls");
 });
 
 function generateRandomString() {
   return (Math.random() * 6).toString(36).substring(6);
 }
+
+/*
+let templateVars = {
+  username: request.cookies["username"],
+  // ... any other vars
+};
+response.render("urls_index", templateVars);
+*/
 
