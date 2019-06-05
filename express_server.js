@@ -11,12 +11,25 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 app.set("view engine", "ejs");
 
-/********************************************* DATABASE ************************************************/
+/********************************************* DATABASEs************************************************/
 /*******************************************************************************************************/
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
+};
+
+const users = {
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
 };
 
 /****************************************** SERVER - LISTEN ********************************************/
@@ -29,11 +42,16 @@ app.listen(PORT, () => {
 /******************************************** SERVER - GET *********************************************/
 /*******************************************************************************************************/
 
+// redirect to register page
+app.get("/register", (request, response) => {
+  let templateVars = {username: ""};
+  response.render("urls_registration", templateVars);
+});
+
 // index directory of website sends templateVars to urls_template.ejs file  
 app.get("/urls", (request, response) => {
   let username = request.cookies["username"];
-  let templateVars = { urls: urlDatabase, username: username }; 
-  console.log(templateVars);
+  let templateVars = { urls: urlDatabase, username: username };
   response.render("urls_index", templateVars);
 });
 
@@ -89,6 +107,7 @@ app.post("/login", (request, response) => {
   response.redirect("/urls");
 });
 
+// clear cookie from browser on logout
 app.post("/logout", (request, response) => {
   response.clearCookie("username");
   response.redirect("/urls");
