@@ -90,7 +90,7 @@ app.post("/login", (request, response) => {
 });
 
 app.post("/logout", (request, response) => {
-  response.clearCookie("username", request.body.username);
+  response.clearCookie("username");
   response.redirect("/urls");
 });
 
