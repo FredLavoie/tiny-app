@@ -14,10 +14,8 @@
     <% include ./partials/_header %>
   </header>
 
-  <a href="/urls/new">Create New TinyURL</a>
-  <br>
-  <a href="/urls/">Return to my TinyURLs</a>
-
+  <a href="/urls/new" style="font-size:15px;">Create New TinyURL</a>
+  
   <h3>My URLs</h3>
   <ul>
     <% let arrayOfURLs = Object.keys(urls) %>
@@ -25,8 +23,8 @@
     <% arrayOfURLs.forEach(function(link) { %>
       <li><%= link %> - <%= urls[link] %></li>
       <form method="POST" action="/urls/<%= link %>/delete">
-        <button type="delete" class="btn btn-primary">Delete</button>
-        <a href="/urls/<%=link %>">Edit</a>
+        <button type="delete" class="btn btn-danger">Delete</button>
+        <a href="/urls/<%=link %>" style="font-size:15px;">Edit/Show</a>
       </form>
     <% }); %>
     
