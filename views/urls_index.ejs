@@ -16,12 +16,11 @@
     </header>   
     <h3>My URLs</h3>
     <ul>
-      <% let arrayOfURLs = Object.keys(urls) %>
-      <% arrayOfURLs.forEach(function(link) { %>
-        <li><%= link %> - <%= urls[link] %></li>
-        <form method="POST" action="/urls/<%= link %>/delete">
+      <% array.forEach(function(shortURL) { %>
+        <li><%= shortURL %> - <%= urls[shortURL].longURL %></li>
+        <form method="POST" action="/urls/<%= shortURL %>/delete">
           <button type="submit" class="btn btn-danger">Delete</button>
-          <a href="/urls/<%=link %>" style="font-size:15px;">Edit/Show</a>
+          <a href="/urls/<%= shortURL %>" style="font-size:15px;">Edit/Show</a>
         </form>
       <% }); %>
     </ul>

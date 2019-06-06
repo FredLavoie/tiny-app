@@ -16,15 +16,19 @@ app.set("view engine", "ejs");
 /*******************************************************************************************************/
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "9sm5xK": {userId: "ert45b6e", longURL: "http://www.google.com"},
+  "b2xVn2": {userId: "asdf4f4h5", longURL: "http://www.lighthouselabs.ca"},
+  "ef45g5g": {userId: "asdf4f4h5", longURL: "http://www.google.ca"},
+  "hjk88k": {userId: "asdf4f4h5", longURL: "http://www.github.com"},
+  "dfgh65674f": {userId: "asdf4f4h5", longURL: "https://github.com/FrancisBourgouin/lhl-w2d4/blob/master/index.js"},
+  "wert345er34": {userId: "asdf4f4h5", longURL: "https://getbootstrap.com/docs/4.1/components/buttons/"},
 };
 
 const users = {
   asdf4f4h5: {
     id: "asdf4f4h5", 
     email: "joe@gmail.com", 
-    password: "purple-monkey-dinosaur"
+    password: "f"
   },
   ert45b6e: {
     id: "ert45b6e", 
@@ -61,7 +65,9 @@ app.get("/urls", (request, response) => {
     response.render("urls_login");
   } else {
     let email = request.cookies["user_id"];
-    let templateVars = { urls: urlDatabase, email: email };
+    let id = getId(email);
+    let shortURLArray = urlsForUser(id);
+    let templateVars = { urls: urlDatabase, email: email, array: shortURLArray };    
     response.render("urls_index", templateVars);
   }
 });
@@ -78,8 +84,13 @@ app.get("/urls/new", (request, response) => {
 
 // redirect traffic of u/:shortURL to longURL
 app.get("/u/:shortURL", (request, response) => {
-  const longURL = urlDatabase[request.params.shortURL];
-  response.redirect(longURL);
+  let long = '';
+  for (let key in urlDatabase) {
+    if (key === request.params.shortURL) {
+      long = urlDatabase[key].longURL;
+    }
+  }
+  response.redirect(long);
 });
 
 // adds shorturl and longurl to 'urlDatabase' object on submit
@@ -89,7 +100,7 @@ app.get("/urls/:shortURL", (request, response) => {
   } else {  
     let templateVars = {
       shortURL: request.params.shortURL,
-      longURL: urlDatabase[request.params.shortURL],
+      longURL: urlDatabase[request.params.shortURL].longURL,
       email: request.cookies["user_id"],
     };
     response.render("urls_show", templateVars);
@@ -101,21 +112,30 @@ app.get("/urls/:shortURL", (request, response) => {
 
 // generates a shorturl upon submitting longURL in form
 app.post("/urls", (request, response) => {
-  let newShortURL = generateRandomString();
-  urlDatabase[newShortURL] = request.body.longURL;
+  let newShortURL = generateRandomString();  
+  let id = getId(request.cookies["user_id"]);
+  urlDatabase[newShortURL] = { userId: id, longURL: request.body.longURL };
   response.redirect("urls/" + newShortURL);
 });
 
 // delete entry from urlDatabase object
 app.post("/urls/:shortURL/delete", (request, response) => {
-  delete urlDatabase[request.params.shortURL];
-  response.redirect("/urls");
+  if (!(request.cookies["user_id"])) {
+    response.render("urls_login");
+  } else {
+    delete urlDatabase[request.params.shortURL];
+    response.redirect("/urls");
+  }
 });
 
 // edit entry from urlDatabase object
 app.post("/urls/:shortURL", (request, response) => {
-  urlDatabase[request.params.shortURL] = request.body.longURL;
-  response.redirect("/urls");
+  if (!(request.cookies["user_id"])) {
+    response.render("urls_login");
+  } else {
+    urlDatabase[request.params.shortURL].longURL = request.body.longURL;
+    response.redirect("/urls");
+  }
 });
 
 // create cookie for user name entered by user in form
@@ -182,4 +202,22 @@ function emailChecker(email) {
     }
   }
   return false;
+}
+
+function getId(email) {
+  for (let key in users) {
+    if (users[key].email === email) {
+      return users[key].id;
+    }
+  }
+}
+
+function urlsForUser(id) {
+  let userArray = [];
+  for (let entry in urlDatabase) {
+    if (urlDatabase[entry].userId === id) {
+      userArray.push(entry);
+    }
+  }
+  return userArray;
 }
