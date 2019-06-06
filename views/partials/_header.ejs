@@ -3,11 +3,9 @@
 <% if(email) { %>
   <a href="/urls">URLs |</a><a href="/urls/new">Create New TinyURL</a>
   <form method="POST" action="/logout">
-    <button type="submit" class="btn btn-primary">Logout</button>
+    <button type="submit" class="btn btn-primary btn-sm">Logout</button>
     <p>Logged in as: <%= email %></p>
   </form>
 <% } else { %>
-  <form method="POST" action="/login">
-    <button type="submit" class="btn btn-primary">Login</button>
-  </form>
+  <a href="/login"><button type="submit" class="btn btn-primary btn-sm">Login</button></a>
 <% } %>

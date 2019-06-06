@@ -29,7 +29,7 @@ const users = {
   ert45b6e: {
     id: "ert45b6e", 
     email: "bob@gmail.com", 
-    password: "dishwasher-funk"
+    password: "d"
   }
 };
 
@@ -57,15 +57,23 @@ app.get("/login", (request, response) => {
 
 // index directory of website sends templateVars to urls_template.ejs file  
 app.get("/urls", (request, response) => {
-  let email = request.cookies["user_id"];
-  let templateVars = { urls: urlDatabase, email: email };
-  response.render("urls_index", templateVars);
+  if (request.cookies["user_id"] === undefined) {
+    response.render("urls_login");
+  } else {
+    let email = request.cookies["user_id"];
+    let templateVars = { urls: urlDatabase, email: email };
+    response.render("urls_index", templateVars);
+  }
 });
 
 // directs to new url creator page
 app.get("/urls/new", (request, response) => {
-  let templateVars = { email: request.cookies["user_id"] };
-  response.render("urls_new", templateVars);
+  if (request.cookies["user_id"] === undefined) {
+    response.render("urls_login");
+  } else {
+    let templateVars = { email: request.cookies["user_id"] };
+    response.render("urls_new", templateVars);
+  }
 });
 
 // redirect traffic of u/:shortURL to longURL
@@ -76,12 +84,16 @@ app.get("/u/:shortURL", (request, response) => {
 
 // adds shorturl and longurl to 'urlDatabase' object on submit
 app.get("/urls/:shortURL", (request, response) => {
-  let templateVars = {
-    shortURL: request.params.shortURL,
-    longURL: urlDatabase[request.params.shortURL],
-    email: request.cookies["user_id"],
-  };
-  response.render("urls_show", templateVars);
+  if (request.cookies["user_id"] === undefined) {
+    response.render("urls_login");
+  } else {  
+    let templateVars = {
+      shortURL: request.params.shortURL,
+      longURL: urlDatabase[request.params.shortURL],
+      email: request.cookies["user_id"],
+    };
+    response.render("urls_show", templateVars);
+  }
 });
 
 /******************************************** SERVER - POST ********************************************/
@@ -111,7 +123,7 @@ app.post("/login", (request, response) => {
   
   if (!request.body.email || !request.body.password) {
     response.status(400).send("<h3>Press back and enter email and password (error: blank input field)</h3>");
-  } else if (emailChecker(request.body.email)) {
+  } else if (!emailChecker(request.body.email)) {
     response.status(403).send("<h3>Press back and enter your email and password (error: user not found)</h3>");
   } else {
     response.cookie("user_id", request.body.email);
@@ -124,7 +136,7 @@ app.post("/login", (request, response) => {
 app.post("/logout", (request, response) => {
   response.clearCookie("user_id");
   response.clearCookie("password");
-  response.redirect("/urls");
+  response.redirect("/login");
 });
 
 // create new user entry in 'users' object
