@@ -1,11 +1,8 @@
 <h1>TinyApp</h1>
 
-<% if(email) { %>
-  <a href="/urls">URLs |</a><a href="/urls/new">Create New TinyURL</a>
-  <form method="POST" action="/logout">
-    <button type="submit" class="btn btn-primary btn-sm">Logout</button>
-    <p>Logged in as: <%= email %></p>
-  </form>
-<% } else { %>
-  <a href="/login"><button type="submit" class="btn btn-primary btn-sm">Login</button></a>
-<% } %>
+<a href="/urls">URLs |</a><a href="/urls/new">Create New TinyURL</a>
+<form method="POST" action="/logout">
+  <button type="submit" class="btn btn-primary btn-sm">Logout</button>
+  <p>Logged in as: <%= email %></p>
+</form>
+

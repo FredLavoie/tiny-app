@@ -57,7 +57,7 @@ app.get("/login", (request, response) => {
 
 // index directory of website sends templateVars to urls_template.ejs file  
 app.get("/urls", (request, response) => {
-  if (request.cookies["user_id"] === undefined) {
+  if (!(request.cookies["user_id"])) {
     response.render("urls_login");
   } else {
     let email = request.cookies["user_id"];
@@ -68,7 +68,7 @@ app.get("/urls", (request, response) => {
 
 // directs to new url creator page
 app.get("/urls/new", (request, response) => {
-  if (request.cookies["user_id"] === undefined) {
+  if (!(request.cookies["user_id"])) {
     response.render("urls_login");
   } else {
     let templateVars = { email: request.cookies["user_id"] };
@@ -84,7 +84,7 @@ app.get("/u/:shortURL", (request, response) => {
 
 // adds shorturl and longurl to 'urlDatabase' object on submit
 app.get("/urls/:shortURL", (request, response) => {
-  if (request.cookies["user_id"] === undefined) {
+  if (!(request.cookies["user_id"])) {
     response.render("urls_login");
   } else {  
     let templateVars = {
@@ -123,7 +123,7 @@ app.post("/login", (request, response) => {
   
   if (!request.body.email || !request.body.password) {
     response.status(400).send("<h3>Press back and enter email and password (error: blank input field)</h3>");
-  } else if (!emailChecker(request.body.email)) {
+  } else if (emailChecker(request.body.email) === false) {
     response.status(403).send("<h3>Press back and enter your email and password (error: user not found)</h3>");
   } else {
     response.cookie("user_id", request.body.email);
@@ -141,10 +141,10 @@ app.post("/logout", (request, response) => {
 
 // create new user entry in 'users' object
 app.post("/register", (request, response) => {
-
+    
   if (!request.body.email || !request.body.password) {
     response.status(400).send("<h3>Press back and enter email and password (error: blank input field)</h3>");
-  } else if (emailChecker(request.body.email)) {
+  } else if (emailChecker(request.body.email) === true) {
     response.status(400).send("<h3>Press back and enter new email and password (error: user already exists)</h3>");
   } else {
 
@@ -153,7 +153,7 @@ app.post("/register", (request, response) => {
     users[newId] = newUser;
     users[newId].email = request.body.email;
     users[newId].password = request.body.password;
-    
+        
     response.cookie("user_Id", request.body.email);
     response.cookie("password", request.body.password);
     response.redirect("/urls");
@@ -179,8 +179,7 @@ function emailChecker(email) {
     let existingEmail = users[entry].email;
     if (email === existingEmail) {
       return true;
-    } else {
-      return false;
     }
   }
+  return false;
 }
