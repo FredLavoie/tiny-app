@@ -4,6 +4,7 @@
 const express = require("express");
 const bodyParser = require("body-parser"); // makes post request readable
 const cookieParser = require('cookie-parser');
+//const uuidv4 = require('uuid/v4');
 const PORT = 8080; // default port 8080
 
 let app = express(); // app is the server
@@ -84,9 +85,9 @@ app.get("/urls/:shortURL", (request, response) => {
 
 // generates a shorturl upon submitting longURL in form
 app.post("/urls", (request, response) => {
-  let item = generateRandomString();
-  urlDatabase[item] = request.body.longURL;
-  response.redirect("urls/" + item);
+  let newShortURL = generateRandomString();
+  urlDatabase[newShortURL] = request.body.longURL;
+  response.redirect("urls/" + newShortURL);
 });
 
 // delete entry from urlDatabase object
@@ -113,10 +114,48 @@ app.post("/logout", (request, response) => {
   response.redirect("/urls");
 });
 
+// create new user entry in 'users' object
+app.post("/register", (request, response) => {
+
+  if (!request.body.email || !request.body.password) {
+    response.status(400).send("<h3>Press back and enter username and password (error: blank input field)</h3>");
+  } else if (emailChecker(request.body.email)) {
+    response.status(400).send("<h3>Press back and enter new username and password (error: user already exists)</h3>");
+  } else {
+
+    let newId = generateRandomId();
+    let newUser = { id: newId, email: '', password: '' };
+    users[newId] = newUser;
+    users[newId].email = request.body.email;
+    users[newId].password = request.body.password;
+
+    response.cookie("userId", request.body.email);
+    response.cookie("password", request.body.password);
+    response.redirect("/urls");
+  }
+});
+
 /********************************************** FUNCTIONS **********************************************/
 /*******************************************************************************************************/
 
+// generates unique shortURL
 function generateRandomString() {
   return (Math.random() * 6).toString(36).substring(6);
 }
 
+// generates unique userId 
+function generateRandomId() {
+  return (Math.random() * 6).toString(36).substring(6);
+}
+
+// email verifies that entry does not exist in 'users' database
+function emailChecker(email) {
+  for (let entry in users) {
+    let existingEmail = users[entry].email;
+    if (email === existingEmail) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
