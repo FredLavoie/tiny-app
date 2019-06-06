@@ -57,13 +57,8 @@ app.get("/login", (request, response) => {
 
 // index directory of website sends templateVars to urls_template.ejs file  
 app.get("/urls", (request, response) => {
-<<<<<<< HEAD
-  let username = request.cookies["username"];
-  let templateVars = { urls: urlDatabase, username: username }; 
-=======
   let email = request.cookies["user_id"];
   let templateVars = { urls: urlDatabase, email: email };
->>>>>>> feature/user-registration
   response.render("urls_index", templateVars);
 });
 
