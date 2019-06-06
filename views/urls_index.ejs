@@ -13,12 +13,8 @@
 
     <header>
       <% include ./partials/_header %>
-    </header>
-
-    <a href="/urls/new" style="font-size:15px;">Create New TinyURL</a>
-    
+    </header>   
     <h3>My URLs</h3>
-
     <ul>
       <% let arrayOfURLs = Object.keys(urls) %>
       <% arrayOfURLs.forEach(function(link) { %>

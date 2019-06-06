@@ -1,13 +1,13 @@
 <h1>TinyApp</h1>
 
 <% if(email) { %>
+  <a href="/urls">URLs |</a><a href="/urls/new">Create New TinyURL</a>
   <form method="POST" action="/logout">
-    <p>Logged in as: <%= email %></p>
     <button type="submit" class="btn btn-primary">Logout</button>
+    <p>Logged in as: <%= email %></p>
   </form>
 <% } else { %>
   <form method="POST" action="/login">
-    <input class="form-control" type="text" name="email" placeholder="email" style="width: 200px; margin: 1em">
     <button type="submit" class="btn btn-primary">Login</button>
   </form>
 <% } %>

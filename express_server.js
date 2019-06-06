@@ -49,6 +49,12 @@ app.get("/register", (request, response) => {
   response.render("urls_registration", templateVars);
 });
 
+// redirect to index after login
+app.get("/login", (request, response) => {
+  let templateVars = {email: ""};
+  response.render("urls_login", templateVars);
+});
+
 // index directory of website sends templateVars to urls_template.ejs file  
 app.get("/urls", (request, response) => {
   let email = request.cookies["user_id"];
@@ -70,13 +76,11 @@ app.get("/u/:shortURL", (request, response) => {
 
 // adds shorturl and longurl to 'urlDatabase' object on submit
 app.get("/urls/:shortURL", (request, response) => {
-  
   let templateVars = {
     shortURL: request.params.shortURL,
     longURL: urlDatabase[request.params.shortURL],
     email: request.cookies["user_id"],
   };
-  
   response.render("urls_show", templateVars);
 });
 
@@ -104,13 +108,22 @@ app.post("/urls/:shortURL", (request, response) => {
 
 // create cookie for user name entered by user in form
 app.post("/login", (request, response) => {
-  response.cookie("user_id", request.body.email);
-  response.redirect("/urls");
+  
+  if (!request.body.email || !request.body.password) {
+    response.status(400).send("<h3>Press back and enter email and password (error: blank input field)</h3>");
+  } else if (emailChecker(request.body.email)) {
+    response.status(403).send("<h3>Press back and enter your email and password (error: user not found)</h3>");
+  } else {
+    response.cookie("user_id", request.body.email);
+    response.cookie("password", request.body.password);
+    response.redirect("/urls");
+  }
 });
 
 // clear cookie from browser on logout
 app.post("/logout", (request, response) => {
   response.clearCookie("user_id");
+  response.clearCookie("password");
   response.redirect("/urls");
 });
 
@@ -118,9 +131,9 @@ app.post("/logout", (request, response) => {
 app.post("/register", (request, response) => {
 
   if (!request.body.email || !request.body.password) {
-    response.status(400).send("<h3>Press back and enter username and password (error: blank input field)</h3>");
+    response.status(400).send("<h3>Press back and enter email and password (error: blank input field)</h3>");
   } else if (emailChecker(request.body.email)) {
-    response.status(400).send("<h3>Press back and enter new username and password (error: user already exists)</h3>");
+    response.status(400).send("<h3>Press back and enter new email and password (error: user already exists)</h3>");
   } else {
 
     let newId = generateRandomId();
@@ -129,7 +142,7 @@ app.post("/register", (request, response) => {
     users[newId].email = request.body.email;
     users[newId].password = request.body.password;
     
-    response.cookie("userId", request.body.email);
+    response.cookie("user_Id", request.body.email);
     response.cookie("password", request.body.password);
     response.redirect("/urls");
   }
