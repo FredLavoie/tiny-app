@@ -21,14 +21,14 @@ const urlDatabase = {
 };
 
 const users = {
-  "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+  asdf4f4h5: {
+    id: "asdf4f4h5", 
+    email: "joe@gmail.com", 
     password: "purple-monkey-dinosaur"
   },
-  "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  ert45b6e: {
+    id: "ert45b6e", 
+    email: "bob@gmail.com", 
     password: "dishwasher-funk"
   }
 };
@@ -45,20 +45,20 @@ app.listen(PORT, () => {
 
 // redirect to register page
 app.get("/register", (request, response) => {
-  let templateVars = {username: ""};
+  let templateVars = {email: ""};
   response.render("urls_registration", templateVars);
 });
 
 // index directory of website sends templateVars to urls_template.ejs file  
 app.get("/urls", (request, response) => {
-  let username = request.cookies["username"];
-  let templateVars = { urls: urlDatabase, username: username };
+  let email = request.cookies["user_id"];
+  let templateVars = { urls: urlDatabase, email: email };
   response.render("urls_index", templateVars);
 });
 
 // directs to new url creator page
 app.get("/urls/new", (request, response) => {
-  let templateVars = { username: request.cookies["username"] };
+  let templateVars = { email: request.cookies["user_id"] };
   response.render("urls_new", templateVars);
 });
 
@@ -74,7 +74,7 @@ app.get("/urls/:shortURL", (request, response) => {
   let templateVars = {
     shortURL: request.params.shortURL,
     longURL: urlDatabase[request.params.shortURL],
-    username: request.cookies["username"],
+    email: request.cookies["user_id"],
   };
   
   response.render("urls_show", templateVars);
@@ -104,13 +104,13 @@ app.post("/urls/:shortURL", (request, response) => {
 
 // create cookie for user name entered by user in form
 app.post("/login", (request, response) => {
-  response.cookie("username", request.body.username);
+  response.cookie("user_id", request.body.email);
   response.redirect("/urls");
 });
 
 // clear cookie from browser on logout
 app.post("/logout", (request, response) => {
-  response.clearCookie("username");
+  response.clearCookie("user_id");
   response.redirect("/urls");
 });
 
@@ -128,7 +128,7 @@ app.post("/register", (request, response) => {
     users[newId] = newUser;
     users[newId].email = request.body.email;
     users[newId].password = request.body.password;
-
+    
     response.cookie("userId", request.body.email);
     response.cookie("password", request.body.password);
     response.redirect("/urls");
