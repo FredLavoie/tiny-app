@@ -1,10 +1,11 @@
-/************************************* REQUIRED PACKAGES / PORT ****************************************/
-/*******************************************************************************************************/
+/************************************************ REQUIRED PACKAGES / PORT ***************************************************/
+/*****************************************************************************************************************************/
 
 const express = require("express");
 const bodyParser = require("body-parser"); // makes post request readable
 const cookieParser = require('cookie-parser');
 //const uuidv4 = require('uuid/v4');
+const bcrypt = require('bcrypt');
 const PORT = 8080; // default port 8080
 
 let app = express(); // app is the server
@@ -12,8 +13,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 app.set("view engine", "ejs");
 
-/********************************************* DATABASEs************************************************/
-/*******************************************************************************************************/
+/******************************************************** DATABASES **********************************************************/
+/*****************************************************************************************************************************/
 
 const urlDatabase = {
   "9sm5xK": {userId: "ert45b6e", longURL: "http://www.google.com"},
@@ -37,15 +38,15 @@ const users = {
   }
 };
 
-/****************************************** SERVER - LISTEN ********************************************/
-/*******************************************************************************************************/
+/***************************************************** SERVER - LISTEN *******************************************************/
+/*****************************************************************************************************************************/
 
 app.listen(PORT, () => {
   console.log(`tiny-app listening on port ${PORT}`);
 });
 
-/******************************************** SERVER - GET *********************************************/
-/*******************************************************************************************************/
+/******************************************************* SERVER - GET ********************************************************/
+/*****************************************************************************************************************************/
 
 // redirect to register page
 app.get("/register", (request, response) => {
@@ -61,7 +62,7 @@ app.get("/login", (request, response) => {
 
 // index directory of website sends templateVars to urls_template.ejs file  
 app.get("/urls", (request, response) => {
-  if (!(request.cookies["user_id"])) {
+  if (request.cookies["user_id"] == undefined) {
     response.render("urls_login");
   } else {
     let email = request.cookies["user_id"];
@@ -74,7 +75,7 @@ app.get("/urls", (request, response) => {
 
 // directs to new url creator page
 app.get("/urls/new", (request, response) => {
-  if (!(request.cookies["user_id"])) {
+  if (request.cookies["user_id"] == undefined) {
     response.render("urls_login");
   } else {
     let templateVars = { email: request.cookies["user_id"] };
@@ -95,7 +96,12 @@ app.get("/u/:shortURL", (request, response) => {
 
 // adds shorturl and longurl to 'urlDatabase' object on submit
 app.get("/urls/:shortURL", (request, response) => {
-  if (!(request.cookies["user_id"])) {
+  let loggedUser = getId(request.cookies["user_id"]);
+  let urlUserId = urlDatabase[request.params.shortURL].userId;
+
+  if(users[loggedUser].userId != urlUserId) {
+    response.status(403).send("<h3>Press back to return to your TinyURLs (error: unauthorized access)</h3>");
+  } else if (request.cookies["user_id"] == undefined) {
     response.render("urls_login");
   } else {  
     let templateVars = {
@@ -107,8 +113,8 @@ app.get("/urls/:shortURL", (request, response) => {
   }
 });
 
-/******************************************** SERVER - POST ********************************************/
-/*******************************************************************************************************/
+/******************************************************* SERVER - POST *******************************************************/
+/*****************************************************************************************************************************/
 
 // generates a shorturl upon submitting longURL in form
 app.post("/urls", (request, response) => {
@@ -147,7 +153,6 @@ app.post("/login", (request, response) => {
     response.status(403).send("<h3>Press back and enter your email and password (error: user not found)</h3>");
   } else {
     response.cookie("user_id", request.body.email);
-    response.cookie("password", request.body.password);
     response.redirect("/urls");
   }
 });
@@ -155,7 +160,6 @@ app.post("/login", (request, response) => {
 // clear cookie from browser on logout
 app.post("/logout", (request, response) => {
   response.clearCookie("user_id");
-  response.clearCookie("password");
   response.redirect("/login");
 });
 
@@ -172,16 +176,17 @@ app.post("/register", (request, response) => {
     let newUser = { id: newId, email: '', password: '' };
     users[newId] = newUser;
     users[newId].email = request.body.email;
-    users[newId].password = request.body.password;
-        
+    let pw = request.body.password;
+    users[newId].password = bcrypt.hashSync(pw, 10);
+    console.log(users);
+    
     response.cookie("user_Id", request.body.email);
-    response.cookie("password", request.body.password);
     response.redirect("/urls");
   }
 });
 
-/********************************************** FUNCTIONS **********************************************/
-/*******************************************************************************************************/
+/********************************************************* FUNCTIONS *********************************************************/
+/*****************************************************************************************************************************/
 
 // generates unique shortURL
 function generateRandomString() {
@@ -204,6 +209,7 @@ function emailChecker(email) {
   return false;
 }
 
+// return the id when entering the email (from cookie)
 function getId(email) {
   for (let key in users) {
     if (users[key].email === email) {
@@ -212,6 +218,7 @@ function getId(email) {
   }
 }
 
+// created array of all urls of user (specified by id)
 function urlsForUser(id) {
   let userArray = [];
   for (let entry in urlDatabase) {
