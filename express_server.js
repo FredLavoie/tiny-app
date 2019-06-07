@@ -1,8 +1,3 @@
-/************************************************************ NOTES **********************************************************/
-/*****************************************************************************************************************************/
-
-// To search for specific endpoints, search for #<KEYWORD>
-
 /************************************************ REQUIRED PACKAGES / PORT ***************************************************/
 /*****************************************************************************************************************************/
 
@@ -22,25 +17,25 @@ app.set("view engine", "ejs");
 /*****************************************************************************************************************************/
 
 const urlDatabase = {
-  "9sm5xK": {userId: "ert45b6e", longURL: "http://www.google.com"},
-  "b2xVn2": {userId: "asdf4f4h5", longURL: "http://www.lighthouselabs.ca"},
-  "ef45g5g": {userId: "asdf4f4h5", longURL: "http://www.google.ca"},
-  "hjk88k": {userId: "asdf4f4h5", longURL: "http://www.github.com"},
-  "dfgh65674f": {userId: "asdf4f4h5", longURL: "https://github.com/FrancisBourgouin/lhl-w2d4/blob/master/index.js"},
-  "wert345er34": {userId: "asdf4f4h5", longURL: "https://getbootstrap.com/docs/4.1/components/buttons/"},
+  '9sm5xK': {userId: 'bgxuc7', longURL: 'http://www.google.com'},
+  'b2xVn2': {userId: 'bgxuc7', longURL: 'http://www.lighthouselabs.ca'},
+  'ef45g5g': {userId: 'iw5ltek', longURL: 'http://www.google.ca'},
+  'hjk88k': {userId: 'bgxuc7', longURL: 'http://www.github.com'},
+  'dfgh65674f': {userId: 'iw5ltek', longURL: 'https://github.com/FrancisBourgouin/lhl-w2d4/blob/master/index.js'},
+  'wert345er34': {userId: 'iw5ltek', longURL: 'https://getbootstrap.com/docs/4.1/components/buttons/'},
 };
 
 const users = {
-  asdf4f4h5: {
-    id: "asdf4f4h5", 
-    email: "joe@gmail.com", 
-    password: "f"
+  iw5ltek: {
+    id: 'iw5ltek',
+    email: 'adam@gmail.com',
+    password: '$2b$10$ccMu1QyTwyw1aGQcWxaYNuel9kDOFw3PqwBbunY9o6HHgiTCCO6gW'
   },
-  ert45b6e: {
-    id: "ert45b6e", 
-    email: "bob@gmail.com", 
-    password: "d"
-  }
+  bgxuc7: {
+    id: 'bgxuc7',
+    email: 'joe@gmail.com',
+    password: '$2b$10$55YhPC5nt0aGvq3sxQRBnOsRbrAQU5bR.ZuDNv/9CQCaO4edWG47O'
+  },
 };
 
 /***************************************************** SERVER - LISTEN *******************************************************/
@@ -59,7 +54,7 @@ app.get("/register", (request, response) => {
   response.render("urls_registration", templateVars);
 });
 
-// redirect to index after login
+// [#POST-LOGIN] redirect to index after login
 app.get("/login", (request, response) => {
   let templateVars = {email: ""};
   response.render("urls_login", templateVars);
@@ -88,7 +83,7 @@ app.get("/urls/new", (request, response) => {
   }
 });
 
-// [#SHARE LINK] redirect traffic of u/:shortURL to longURL
+// [#SHARE-LINK] redirect traffic of u/:shortURL to longURL
 app.get("/u/:shortURL", (request, response) => {
   let long = '';
   for (let key in urlDatabase) {
@@ -99,17 +94,15 @@ app.get("/u/:shortURL", (request, response) => {
   response.redirect(long);
 });
 
-// [#SHORT URL] adds shorturl and longurl to 'urlDatabase' object on submit
+// [#SHORT-URL] adds shorturl and longurl to 'urlDatabase' object on submit
 app.get("/urls/:shortURL", (request, response) => {
-  console.log(request.cookies["user_id"]);
   
   if(request.cookies["user_id"] == '') { // if not logged in, can't edit urls
     response.render("urls_login");
   } 
   
   let loggedUser = getId(request.cookies["user_id"]);
-  let urlUserId = users[request.params.shortURL].id;
-  console.log(loggedUser, urlUserId);
+  let urlUserId = urlDatabase[request.params.shortURL].userId;
 
   if (loggedUser != urlUserId) { // user prevented from accessing other user urls
     response.status(403).send("<h3>Press back to return to your TinyURLs (error: unauthorized access)</h3>");
@@ -136,7 +129,7 @@ app.post("/urls", (request, response) => {
 
 // [#DELETE] delete entry from urlDatabase object
 app.post("/urls/:shortURL/delete", (request, response) => {
-  if (!(request.cookies["user_id"])) {
+  if (request.cookies["user_id"] == '') {
     response.render("urls_login");
   } else {
     delete urlDatabase[request.params.shortURL];
@@ -146,7 +139,7 @@ app.post("/urls/:shortURL/delete", (request, response) => {
 
 // [#UPDATE] edit entry from urlDatabase object
 app.post("/urls/:shortURL", (request, response) => {
-  if (!(request.cookies["user_id"])) {
+  if (request.cookies["user_id"] == '') {
     response.render("urls_login");
   } else {
     urlDatabase[request.params.shortURL].longURL = request.body.longURL;
@@ -187,14 +180,17 @@ app.post("/register", (request, response) => {
     response.status(400).send("<h3>Press back and enter new email and password (error: user already exists)</h3>");
   } else {
 
-    let newId = generateRandomId();
+    let newId = generateRandomString();
     let newUser = { id: newId, email: '', password: '' };
     users[newId] = newUser;
     users[newId].email = request.body.email;
     let pw = request.body.password;
     users[newId].password = bcrypt.hashSync(pw, 10);
     
-    response.cookie("user_Id", request.body.email);
+    console.log(users);
+    
+
+    response.cookie("user_id", request.body.email);
     response.redirect("/urls");
   }
 });
@@ -202,13 +198,8 @@ app.post("/register", (request, response) => {
 /********************************************************* FUNCTIONS *********************************************************/
 /*****************************************************************************************************************************/
 
-// generate unique shortURL
+// generate unique string (used for user IDs and short URLs)
 function generateRandomString() {
-  return (Math.random() * 6).toString(36).substring(6);
-}
-
-// generate unique userId 
-function generateRandomId() {
   return (Math.random() * 6).toString(36).substring(6);
 }
 
@@ -232,7 +223,7 @@ function getId(email) {
   }
 }
 
-// create array of all shortURL that belong to specific user (specified by id)
+// create array of all shortURL that belong to specific user using 'id' as input
 function urlsForUser(id) {
   let userArray = [];
   for (let entry in urlDatabase) {
