@@ -1,6 +1,7 @@
 /************************************************ REQUIRED PACKAGES / PORT ***************************************************/
 /*****************************************************************************************************************************/
 
+const fs = require("fs");
 const express = require("express");
 const bodyParser = require("body-parser"); // makes post request readable
 const cookieSession = require('cookie-session');
@@ -47,6 +48,78 @@ app.listen(PORT, () => {
   console.log(`tiny-app listening on port ${PORT}`);
 });
 
+/********************************************************* FUNCTIONS *********************************************************/
+/*****************************************************************************************************************************/
+
+// generate unique string (used for user IDs and short URLs)
+function generateRandomString() {
+  return (Math.random() * 6).toString(36).substring(6);
+}
+
+// check if email exists in 'users' database
+function emailChecker(email) {
+  for (let entry in users) {
+    let existingEmail = users[entry].email;
+    if (email === existingEmail) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// retreive 'id' from 'users' database using 'email' as input
+function getId(email) {
+  for (let key in users) {
+    if (users[key].email === email) {
+      return users[key].id;
+    }
+  }
+}
+
+// create array of all shortURL that belong to specific user using 'id' as input
+function urlsForUser(id) {
+  let userArray = [];
+  for (let entry in urlDatabase) {
+    if (urlDatabase[entry].userId === id) {
+      userArray.push(entry);
+    }
+  }
+  return userArray;
+}
+
+// shortURL add to count - file I/O
+function shortURLcount(url) {
+  
+  fs.readFile('shortURLcount.json', 'utf-8', function (error, data){
+    if (error) {
+      console.log(error);
+    }
+    let array = JSON.parse(data);
+    
+    for(let entry of array) {
+      if (entry.url === url) { 
+        entry.count += 1;
+        let update = JSON.stringify(array);
+        fs.writeFileSync('shortURLcount.json', update);
+      }
+    }
+  });  
+}
+
+// get count of shortURL - file I/O
+function getCount(url) {
+  
+  let data = fs.readFileSync('shortURLcount.json', 'utf-8');
+  let array = JSON.parse(data);
+  
+  for(let entry of array) {
+    if (entry.url == url) {       
+      return entry.count;
+    }
+  }
+}
+
+
 /******************************************************* SERVER - GET ********************************************************/
 /*****************************************************************************************************************************/
 
@@ -67,11 +140,8 @@ app.get("/urls", (request, response) => {
   if (request.session.user_id == null) {
     response.render("urls_login");
   } else {
-    console.log(users);
     let id = request.session.user_id;
-    console.log(id);
     let email = users[id].email;
-    console.log(email);
     let shortURLArray = urlsForUser(id);
     let templateVars = { urls: urlDatabase, email: email, array: shortURLArray };    
     response.render("urls_index", templateVars);
@@ -90,9 +160,11 @@ app.get("/urls/new", (request, response) => {
 
 // [#SHARE-LINK] redirect traffic of u/:shortURL to longURL
 app.get("/u/:shortURL", (request, response) => {
+  let shortURL = request.params.shortURL;
+  shortURLcount(shortURL);
   let long = '';
   for (let key in urlDatabase) {
-    if (key === request.params.shortURL) {
+    if (key === shortURL) {
       long = urlDatabase[key].longURL;
     }
   }
@@ -110,12 +182,17 @@ app.get("/urls/:shortURL", (request, response) => {
 
   if (loggedUser !== urlUserId) { // user prevented from accessing other user urls
     response.status(403).send("<h3>Press back to return to your TinyURLs (error: unauthorized access)</h3>");
-  } else {  
+  } else {
+    let num = getCount(request.params.shortURL);
+    console.log(num);
+    
     let templateVars = {
       shortURL: request.params.shortURL,
       longURL: urlDatabase[request.params.shortURL].longURL,
-      email: request.session.user_id,
+      email: users[request.session.user_id].email,
+      count: num,
     };
+    
     response.render("urls_show", templateVars);
   }
 });
@@ -128,7 +205,6 @@ app.post("/urls", (request, response) => {
   let newShortURL = generateRandomString();  
   let id = request.session.user_id;
   urlDatabase[newShortURL] = { userId: id, longURL: request.body.longURL };
-  console.log(urlDatabase);
   response.redirect("urls/" + newShortURL);
 });
 
@@ -191,49 +267,9 @@ app.post("/register", (request, response) => {
     users[newId].email = request.body.email;
     let pw = request.body.password;
     users[newId].password = bcrypt.hashSync(pw, 10);
-   
-    console.log(newId);
-    
+
     request.session.user_id = newId;
     response.redirect("/urls");
   }
 });
 
-/********************************************************* FUNCTIONS *********************************************************/
-/*****************************************************************************************************************************/
-
-// generate unique string (used for user IDs and short URLs)
-function generateRandomString() {
-  return (Math.random() * 6).toString(36).substring(6);
-}
-
-// check if email exists in 'users' database
-function emailChecker(email) {
-  for (let entry in users) {
-    let existingEmail = users[entry].email;
-    if (email === existingEmail) {
-      return true;
-    }
-  }
-  return false;
-}
-
-// retreive 'id' from 'users' database using 'email' as input
-function getId(email) {
-  for (let key in users) {
-    if (users[key].email === email) {
-      return users[key].id;
-    }
-  }
-}
-
-// create array of all shortURL that belong to specific user using 'id' as input
-function urlsForUser(id) {
-  let userArray = [];
-  for (let entry in urlDatabase) {
-    if (urlDatabase[entry].userId === id) {
-      userArray.push(entry);
-    }
-  }
-  return userArray;
-}
