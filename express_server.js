@@ -1,3 +1,8 @@
+/************************************************************ NOTES **********************************************************/
+/*****************************************************************************************************************************/
+
+// To search for specific endpoints, search for #<KEYWORD>
+
 /************************************************ REQUIRED PACKAGES / PORT ***************************************************/
 /*****************************************************************************************************************************/
 
@@ -48,7 +53,7 @@ app.listen(PORT, () => {
 /******************************************************* SERVER - GET ********************************************************/
 /*****************************************************************************************************************************/
 
-// redirect to register page
+// [#REGISTER] redirect to register page
 app.get("/register", (request, response) => {
   let templateVars = {email: ""};
   response.render("urls_registration", templateVars);
@@ -60,9 +65,9 @@ app.get("/login", (request, response) => {
   response.render("urls_login", templateVars);
 });
 
-// index directory of website sends templateVars to urls_template.ejs file  
+// [#INDEX] index directory of website sends templateVars to urls_template.ejs file  
 app.get("/urls", (request, response) => {
-  if (request.cookies["user_id"] == undefined) {
+  if (request.cookies["user_id"] == '') {
     response.render("urls_login");
   } else {
     let email = request.cookies["user_id"];
@@ -73,9 +78,9 @@ app.get("/urls", (request, response) => {
   }
 });
 
-// directs to new url creator page
+// [#NEW] directs to new url creator page
 app.get("/urls/new", (request, response) => {
-  if (request.cookies["user_id"] == undefined) {
+  if (request.cookies["user_id"] == '') {
     response.render("urls_login");
   } else {
     let templateVars = { email: request.cookies["user_id"] };
@@ -83,7 +88,7 @@ app.get("/urls/new", (request, response) => {
   }
 });
 
-// redirect traffic of u/:shortURL to longURL
+// [#SHARE LINK] redirect traffic of u/:shortURL to longURL
 app.get("/u/:shortURL", (request, response) => {
   let long = '';
   for (let key in urlDatabase) {
@@ -94,15 +99,20 @@ app.get("/u/:shortURL", (request, response) => {
   response.redirect(long);
 });
 
-// adds shorturl and longurl to 'urlDatabase' object on submit
+// [#SHORT URL] adds shorturl and longurl to 'urlDatabase' object on submit
 app.get("/urls/:shortURL", (request, response) => {
-  let loggedUser = getId(request.cookies["user_id"]);
-  let urlUserId = urlDatabase[request.params.shortURL].userId;
-
-  if(users[loggedUser].userId != urlUserId) {
-    response.status(403).send("<h3>Press back to return to your TinyURLs (error: unauthorized access)</h3>");
-  } else if (request.cookies["user_id"] == undefined) {
+  console.log(request.cookies["user_id"]);
+  
+  if(request.cookies["user_id"] == '') { // if not logged in, can't edit urls
     response.render("urls_login");
+  } 
+  
+  let loggedUser = getId(request.cookies["user_id"]);
+  let urlUserId = users[request.params.shortURL].id;
+  console.log(loggedUser, urlUserId);
+
+  if (loggedUser != urlUserId) { // user prevented from accessing other user urls
+    response.status(403).send("<h3>Press back to return to your TinyURLs (error: unauthorized access)</h3>");
   } else {  
     let templateVars = {
       shortURL: request.params.shortURL,
@@ -116,7 +126,7 @@ app.get("/urls/:shortURL", (request, response) => {
 /******************************************************* SERVER - POST *******************************************************/
 /*****************************************************************************************************************************/
 
-// generates a shorturl upon submitting longURL in form
+// [#CREATE] generates a shorturl upon submitting longURL in form
 app.post("/urls", (request, response) => {
   let newShortURL = generateRandomString();  
   let id = getId(request.cookies["user_id"]);
@@ -124,7 +134,7 @@ app.post("/urls", (request, response) => {
   response.redirect("urls/" + newShortURL);
 });
 
-// delete entry from urlDatabase object
+// [#DELETE] delete entry from urlDatabase object
 app.post("/urls/:shortURL/delete", (request, response) => {
   if (!(request.cookies["user_id"])) {
     response.render("urls_login");
@@ -134,7 +144,7 @@ app.post("/urls/:shortURL/delete", (request, response) => {
   }
 });
 
-// edit entry from urlDatabase object
+// [#UPDATE] edit entry from urlDatabase object
 app.post("/urls/:shortURL", (request, response) => {
   if (!(request.cookies["user_id"])) {
     response.render("urls_login");
@@ -144,26 +154,31 @@ app.post("/urls/:shortURL", (request, response) => {
   }
 });
 
-// create cookie for user name entered by user in form
+// [#LOGIN] create cookie for user name entered by user in form
 app.post("/login", (request, response) => {
-  
+  let userEmail = request.body.email;
+  let userId = getId(userEmail);
+
   if (!request.body.email || !request.body.password) {
     response.status(400).send("<h3>Press back and enter email and password (error: blank input field)</h3>");
   } else if (emailChecker(request.body.email) === false) {
     response.status(403).send("<h3>Press back and enter your email and password (error: user not found)</h3>");
-  } else {
+  } else if (bcrypt.compareSync(request.body.password, users[userId].password) || users[userId].email == userEmail) {
     response.cookie("user_id", request.body.email);
     response.redirect("/urls");
+  } else {
+    response.status(403).send("<h3>Press back and re-enter email and password (error: wrong email and/or password)</h3>");
   }
+
 });
 
-// clear cookie from browser on logout
+// [#LOGOUT] clear cookie from browser on logout
 app.post("/logout", (request, response) => {
   response.clearCookie("user_id");
   response.redirect("/login");
 });
 
-// create new user entry in 'users' object
+// [#REGISTER] create new user entry in 'users' object
 app.post("/register", (request, response) => {
     
   if (!request.body.email || !request.body.password) {
@@ -178,7 +193,6 @@ app.post("/register", (request, response) => {
     users[newId].email = request.body.email;
     let pw = request.body.password;
     users[newId].password = bcrypt.hashSync(pw, 10);
-    console.log(users);
     
     response.cookie("user_Id", request.body.email);
     response.redirect("/urls");
@@ -188,17 +202,17 @@ app.post("/register", (request, response) => {
 /********************************************************* FUNCTIONS *********************************************************/
 /*****************************************************************************************************************************/
 
-// generates unique shortURL
+// generate unique shortURL
 function generateRandomString() {
   return (Math.random() * 6).toString(36).substring(6);
 }
 
-// generates unique userId 
+// generate unique userId 
 function generateRandomId() {
   return (Math.random() * 6).toString(36).substring(6);
 }
 
-// email verifies that entry does not exist in 'users' database
+// check if email exists in 'users' database
 function emailChecker(email) {
   for (let entry in users) {
     let existingEmail = users[entry].email;
@@ -209,7 +223,7 @@ function emailChecker(email) {
   return false;
 }
 
-// return the id when entering the email (from cookie)
+// retreive 'id' from 'users' database using 'email' as input
 function getId(email) {
   for (let key in users) {
     if (users[key].email === email) {
@@ -218,7 +232,7 @@ function getId(email) {
   }
 }
 
-// created array of all urls of user (specified by id)
+// create array of all shortURL that belong to specific user (specified by id)
 function urlsForUser(id) {
   let userArray = [];
   for (let entry in urlDatabase) {
