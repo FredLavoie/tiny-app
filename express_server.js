@@ -152,12 +152,12 @@ app.post("/login", (request, response) => {
   let userEmail = request.body.email;
   let userId = getId(userEmail);
 
-  if (!request.body.email || !request.body.password) {
+  if (!userEmail || !request.body.password) {
     response.status(400).send("<h3>Press back and enter email and password (error: blank input field)</h3>");
-  } else if (emailChecker(request.body.email) === false) {
+  } else if (emailChecker(userEmail) === false) {
     response.status(403).send("<h3>Press back and enter your email and password (error: user not found)</h3>");
-  } else if (bcrypt.compareSync(request.body.password, users[userId].password) || users[userId].email == userEmail) {
-    response.cookie("user_id", request.body.email);
+  } else if (bcrypt.compareSync(request.body.password, users[userId].password) === true && users[userId].email == userEmail) {
+    response.cookie("user_id", userEmail);
     response.redirect("/urls");
   } else {
     response.status(403).send("<h3>Press back and re-enter email and password (error: wrong email and/or password)</h3>");
