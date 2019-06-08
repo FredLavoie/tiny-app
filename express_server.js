@@ -16,22 +16,6 @@ app.use(cookieSession({
   keys: ['LighthouseLabsTinyAppProject!'] //,'KeyNumberTwoNotSureWhyINeedThis'],
 }));
 
-/***************************************************** DATABASES **********************************************************/
-/**************************************************************************************************************************/
-
-const users = {
-  iw5ltek: {
-    id: 'iw5ltek',
-    email: 'adam@gmail.com',
-    password: '$2b$10$ccMu1QyTwyw1aGQcWxaYNuel9kDOFw3PqwBbunY9o6HHgiTCCO6gW'
-  },
-  bgxuc7: {
-    id: 'bgxuc7',
-    email: 'joe@gmail.com',
-    password: '$2b$10$55YhPC5nt0aGvq3sxQRBnOsRbrAQU5bR.ZuDNv/9CQCaO4edWG47O'
-  },
-};
-
 /************************************************** SERVER - LISTEN *******************************************************/
 /**************************************************************************************************************************/
 
@@ -49,8 +33,11 @@ function generateRandomString() {
 
 // check if email exists in 'users' database
 function emailChecker(email) {
-  for (let entry in users) {
-    let existingEmail = users[entry].email;
+  let members = fs.readFileSync('_users.json', 'utf-8');
+  let _users = JSON.parse(members);
+
+  for (let entry in _users) {
+    let existingEmail = _users[entry].email;
     if (email === existingEmail) {
       return true;
     }
@@ -136,8 +123,10 @@ app.get("/", (request, response) => {
   if (request.session.user_id == null) {
     response.render("urls_login");
   } else {
+    let members = fs.readFileSync('_users.json', 'utf-8');
+    let _users = JSON.parse(members);
     let id = request.session.user_id;
-    let email = users[id].email;
+    let email = _users[id].email;
     let shortURLArray = urlsForUser(id);
     
     let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
@@ -154,7 +143,7 @@ app.get("/register", (request, response) => {
   response.render("urls_registration", templateVars);
 });
 
-// [#POST-LOGIN] redirect to index after login
+// [#AFTER-LOGIN] redirect to index after login
 app.get("/login", (request, response) => {
   let templateVars = {email: ""};
   response.render("urls_login", templateVars);
@@ -165,8 +154,10 @@ app.get("/urls", (request, response) => {
   if (request.session.user_id == null) {
     response.render("urls_login");
   } else {
+    let members = fs.readFileSync('_users.json', 'utf-8');
+    let _users = JSON.parse(members);
     let id = request.session.user_id;
-    let email = users[id].email;
+    let email = _users[id].email;
     let shortURLArray = urlsForUser(id);
 
     let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
@@ -182,8 +173,10 @@ app.get("/urls/new", (request, response) => {
   if (request.session.user_id == null) {
     response.render("urls_login");
   } else {
+    let members = fs.readFileSync('_users.json', 'utf-8');
+    let _users = JSON.parse(members);
     let id = request.session.user_id;
-    let email = users[id].email;
+    let email = _users[id].email;
     let templateVars = { email: email };
     response.render("urls_new", templateVars);
   }
@@ -222,11 +215,13 @@ app.get("/urls/:shortURL", (request, response) => {
     response.status(403).send("<h3>Press back to return to your TinyURLs (error: unauthorized access)</h3>");
   } else {
     let num = getCount(request.params.shortURL);
-        
+    let members = fs.readFileSync('_users.json', 'utf-8');
+    let _users = JSON.parse(members);
+
     let templateVars = {
       shortURL: request.params.shortURL,
       longURL: _urlDatabase[request.params.shortURL].longURL,
-      email: users[request.session.user_id].email,
+      email: _users[request.session.user_id].email,
       count: num,
     };
     
@@ -286,6 +281,8 @@ app.post("/urls/:shortURL", (request, response) => {
 
 // [#LOGIN] create cookie for user name entered by user in form
 app.post("/login", (request, response) => {
+  let members = fs.readFileSync('_users.json', 'utf-8');
+  let _users = JSON.parse(members);
   let userEmail = request.body.email;
   let userPassword = request.body.password;
   let userId = getId(userEmail);
@@ -294,7 +291,7 @@ app.post("/login", (request, response) => {
     response.status(400).send("<h3>Press back and enter email and password (error: blank input field)</h3>");
   } else if (emailChecker(userEmail) === false) {
     response.status(403).send("<h3>Press back and enter your email and password (error: user not found)</h3>");
-  } else if (bcrypt.compareSync(userPassword, users[userId].password) === true && users[userId].email == userEmail) {
+  } else if (bcrypt.compareSync(userPassword, _users[userId].password) === true && _users[userId].email == userEmail) {
     request.session.user_id = userId;
     response.redirect("/urls");
   } else {
@@ -319,14 +316,18 @@ app.post("/register", (request, response) => {
   } else if (emailChecker(userEmail) === true) {
     response.status(400).send("<h3>Press back and enter new email and password (error: user already exists)</h3>");
   } else {
+    let members = fs.readFileSync('_users.json', 'utf-8');
+    let _users = JSON.parse(members);
 
     let newId = generateRandomString();
     let newUser = { id: newId, email: '', password: '' };
-    users[newId] = newUser;
-    users[newId].email = userEmail;
+    _users[newId] = newUser;
+    _users[newId].email = userEmail;
     let pw = userPassword;
-    users[newId].password = bcrypt.hashSync(pw, 10);
+    _users[newId].password = bcrypt.hashSync(pw, 10);
 
+    let updatedUsers = JSON.stringify(_users);
+    fs.writeFileSync('_users.json', updatedUsers);
 
     request.session.user_id = newId;
     response.redirect("/urls");
