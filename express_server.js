@@ -115,6 +115,12 @@ function addURL(url) {
   fs.writeFileSync('shortURLcount.json', updatedArray);
 }
 
+// add link to shortURL - file I/O
+function deleteAllURL(url){
+
+
+}
+
 /**************************************************** SERVER - GET ********************************************************/
 /**************************************************************************************************************************/
 
@@ -237,32 +243,73 @@ app.post("/urls", (request, response) => {
   let newShortURL = generateRandomString();
   let id = request.session.user_id;
 
-  let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
-  let _urlDatabase = JSON.parse(data);
+  fs.readFile('_urlDatabase.json', 'utf-8', function(error, data){
+    if (error) {
+      console.log(error);
+    }
 
-  _urlDatabase[newShortURL] = { userId: id, longURL: request.body.longURL };
-  addURL(newShortURL);
+    let _urlDatabase = JSON.parse(data);
   
-  let updatedDatabase = JSON.stringify(_urlDatabase);
-  fs.writeFileSync('_urlDatabase.json', updatedDatabase);
+    _urlDatabase[newShortURL] = { userId: id, longURL: request.body.longURL };
+    addURL(newShortURL);
+    
+    let updatedDatabase = JSON.stringify(_urlDatabase);
 
-  response.redirect("urls/" + newShortURL);
+    fs.writeFile('_urlDatabase.json', updatedDatabase, function(error){
+      if (error) {
+        console.log(error);
+      }
+      response.redirect("urls/" + newShortURL);
+    });
+
+  });
+
 });
 
-// [#DELETE] delete entry from urlDatabase object
+// [#DELETE] delete entry from 'urlDatabase' object
 app.post("/urls/:shortURL/delete", (request, response) => {
   if (request.session.user_id == null) {
     response.render("urls_login");
   } else {
-    let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
-    let _urlDatabase = JSON.parse(data);
-
-    delete _urlDatabase[request.params.shortURL];
-    let updatedDatabase = JSON.stringify(_urlDatabase);
-    fs.writeFileSync('_urlDatabase.json', updatedDatabase);
-
-    response.redirect("/urls");
+    fs.readFile('_urlDatabase.json', 'utf-8', function(error, data){
+      if (error) {
+        console.log(error);
+      }
+      let _urlDatabase = JSON.parse(data);
+  
+      delete _urlDatabase[request.params.shortURL];
+      let updatedDatabase = JSON.stringify(_urlDatabase);
+      fs.writeFile('_urlDatabase.json', updatedDatabase, function(error){
+        if (error) {
+          console.log(error);
+        }
+        response.redirect("/urls");
+      }); 
+    });
   }
+});
+
+// [#DELETE-ACCOUNT] delete entry from 'users' object
+app.post("/delete", (request, response) => {
+  fs.readFile('_users.json', 'utf-8', function(error, members){
+    if (error) {
+      console.log(error);
+    }     
+    let _users = JSON.parse(members);
+    let id = request.session.user_id;
+     
+    delete _users[id];
+    
+    let updatedUsers = JSON.stringify(_users);
+    fs.writeFile('_users.json', updatedUsers, function(error){
+      if (error) {
+        console.log(error);
+      }
+      request.session = null;
+      response.redirect("/register");
+    });
+    
+  });
 });
 
 // [#UPDATE] edit entry from urlDatabase object
@@ -270,12 +317,17 @@ app.post("/urls/:shortURL", (request, response) => {
   if (request.session.user_id == null) {
     response.render("urls_login");
   } else {
-    let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
-    let _urlDatabase = JSON.parse(data);
-    _urlDatabase[request.params.shortURL].longURL = request.body.longURL;
-    let updatedDatabase = JSON.stringify(_urlDatabase);
-    fs.writeFileSync('_urlDatabase.json', updatedDatabase);
-    response.redirect("/urls");
+    fs.readFile('_urlDatabase.json', 'utf-8', function(error, data){
+      if (error) {
+        console.log(error);
+      }
+      let _urlDatabase = JSON.parse(data);
+      _urlDatabase[request.params.shortURL].longURL = request.body.longURL;
+      let updatedDatabase = JSON.stringify(_urlDatabase);
+      fs.writeFile('_urlDatabase.json', updatedDatabase);
+      response.redirect("/urls");
+    });
+    
   }
 });
 
@@ -316,21 +368,30 @@ app.post("/register", (request, response) => {
   } else if (emailChecker(userEmail) === true) {
     response.status(400).send("<h3>Press back and enter new email and password (error: user already exists)</h3>");
   } else {
-    let members = fs.readFileSync('_users.json', 'utf-8');
-    let _users = JSON.parse(members);
-
-    let newId = generateRandomString();
-    let newUser = { id: newId, email: '', password: '' };
-    _users[newId] = newUser;
-    _users[newId].email = userEmail;
-    let pw = userPassword;
-    _users[newId].password = bcrypt.hashSync(pw, 10);
-
-    let updatedUsers = JSON.stringify(_users);
-    fs.writeFileSync('_users.json', updatedUsers);
-
-    request.session.user_id = newId;
-    response.redirect("/urls");
+    fs.readFile('_users.json', 'utf-8', function(error, members){
+      if (error) {
+        console.log(error);
+      }      
+      
+      let _users = JSON.parse(members);
+  
+      let newId = generateRandomString();
+      let newUser = { id: newId, email: '', password: '' };
+      _users[newId] = newUser;
+      _users[newId].email = userEmail;
+      let pw = userPassword;
+      _users[newId].password = bcrypt.hashSync(pw, 10);
+  
+      let updatedUsers = JSON.stringify(_users);
+      fs.writeFile('_users.json', updatedUsers, function(error){
+        if (error) {
+          console.log(error);
+        }
+        request.session.user_id = newId;
+        response.redirect("/urls");
+      });
+    });
+   
   }
 });
 
