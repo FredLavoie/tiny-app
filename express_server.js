@@ -136,6 +136,19 @@ function addURL(url) {
 /******************************************************* SERVER - GET ********************************************************/
 /*****************************************************************************************************************************/
 
+// [#ROOT] redirect to /login or /urls
+app.get("/", (request, response) => {
+  if (request.session.user_id == null) {
+    response.render("urls_login");
+  } else {
+    let id = request.session.user_id;
+    let email = users[id].email;
+    let shortURLArray = urlsForUser(id);
+    let templateVars = { urls: urlDatabase, email: email, array: shortURLArray };    
+    response.render("urls_index", templateVars);
+  }
+});
+
 // [#REGISTER] redirect to register page
 app.get("/register", (request, response) => {
   let templateVars = {email: ""};
