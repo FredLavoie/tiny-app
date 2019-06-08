@@ -87,7 +87,7 @@ function urlsForUser(id) {
   return userArray;
 }
 
-// shortURL add to count - file I/O
+// add to count in shortURL - file I/O
 function shortURLcount(url) {
   
   fs.readFile('shortURLcount.json', 'utf-8', function (error, data){
@@ -118,6 +118,19 @@ function getCount(url) {
     }
   }
 }
+
+// add link to shortURL - file I/O
+function addURL(url) {
+  
+  let newObj = { url: url, count: 0 };
+  let data = fs.readFileSync('shortURLcount.json', 'utf-8');
+  let array = JSON.parse(data);
+
+  array.push(newObj);
+  let updatedArray = JSON.stringify(array);
+  fs.writeFileSync('shortURLcount.json', updatedArray);
+}
+
 
 
 /******************************************************* SERVER - GET ********************************************************/
@@ -204,6 +217,7 @@ app.post("/urls", (request, response) => {
   let newShortURL = generateRandomString();  
   let id = request.session.user_id;
   urlDatabase[newShortURL] = { userId: id, longURL: request.body.longURL };
+  addURL(newShortURL);
   response.redirect("urls/" + newShortURL);
 });
 
@@ -230,13 +244,14 @@ app.post("/urls/:shortURL", (request, response) => {
 // [#LOGIN] create cookie for user name entered by user in form
 app.post("/login", (request, response) => {
   let userEmail = request.body.email;
+  let userPassword = request.body.password;
   let userId = getId(userEmail);
 
-  if (!userEmail || !request.body.password) {
+  if (!userEmail || !userPassword) {
     response.status(400).send("<h3>Press back and enter email and password (error: blank input field)</h3>");
   } else if (emailChecker(userEmail) === false) {
     response.status(403).send("<h3>Press back and enter your email and password (error: user not found)</h3>");
-  } else if (bcrypt.compareSync(request.body.password, users[userId].password) === true && users[userId].email == userEmail) {
+  } else if (bcrypt.compareSync(userPassword, users[userId].password) === true && users[userId].email == userEmail) {
     request.session.user_id = userId;
     response.redirect("/urls");
   } else {
@@ -253,19 +268,22 @@ app.post("/logout", (request, response) => {
 
 // [#REGISTER] create new user entry in 'users' object
 app.post("/register", (request, response) => {
-    
-  if (!request.body.email || !request.body.password) {
+  let userEmail = request.body.email;
+  let userPassword = request.body.password;
+
+  if (!userEmail || !userPassword) {
     response.status(400).send("<h3>Press back and enter email and password (error: blank input field)</h3>");
-  } else if (emailChecker(request.body.email) === true) {
+  } else if (emailChecker(userEmail) === true) {
     response.status(400).send("<h3>Press back and enter new email and password (error: user already exists)</h3>");
   } else {
 
     let newId = generateRandomString();
     let newUser = { id: newId, email: '', password: '' };
     users[newId] = newUser;
-    users[newId].email = request.body.email;
-    let pw = request.body.password;
+    users[newId].email = userEmail;
+    let pw = userPassword;
     users[newId].password = bcrypt.hashSync(pw, 10);
+
 
     request.session.user_id = newId;
     response.redirect("/urls");
