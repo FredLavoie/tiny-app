@@ -9,19 +9,19 @@ The [bcrypt.js](https://www.npmjs.com/package/bcrypt) node module is used during
 ## Screenshots
 
 ### Registration
-![Registeration](./screenshots/register.png)
+<img src="./screenshots/register.png" width="800">
 
 ### Login
-![Login](./screenshots/login.png)
+<img src="./screenshots/login.png" width="800">
 
 ### Create a new short URL
-![Create new link](./screenshots/create-new.png)
+<img src="./screenshots/create-new.png" width="800">
 
 ### Show a URL
-![Show link](./screenshots/show-link.png)
+<img src="./screenshots/show-link.png" width="800">
 
 ### User index/home
-![User index](./screenshots/index.png)
+<img src="./screenshots/index.png" width="800">
 
 
 ## Getting Started
