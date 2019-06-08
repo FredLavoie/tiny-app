@@ -28,7 +28,13 @@ The [bcrypt.js](https://www.npmjs.com/package/bcrypt) node module is used during
 
 In order to use TinyApp, you must first clone the project to your local machine.
 
-Once the project is cloned, head over to your bash terminal and type the following command:
+Once the project is cloned, head over to your bash terminal and isntall the dependencies (listed below) using the following command:
+
+```
+npm install <module name>
+```
+
+Once all the dependencies are installed, type the following command:
 
 ```
 node express_server.js
