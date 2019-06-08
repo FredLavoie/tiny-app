@@ -60,9 +60,12 @@ function emailChecker(email) {
 
 // retreive 'id' from 'users' database using 'email' as input
 function getId(email) {
-  for (let key in users) {
-    if (users[key].email === email) {
-      return users[key].id;
+  let members = fs.readFileSync('_users.json', 'utf-8');
+  let _users = JSON.parse(members);
+
+  for (let key in _users) {
+    if (_users[key].email === email) {
+      return _users[key].id;
     }
   }
 }
