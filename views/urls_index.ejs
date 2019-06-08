@@ -19,7 +19,7 @@
       <% array.forEach(function(shortURL) { %>
         <li><%= shortURL %> - <%= urls[shortURL].longURL %></li>
         <form method="POST" action="/urls/<%= shortURL %>/delete">
-          <button type="submit" class="btn btn-danger">Delete</button>
+          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
           <a href="/urls/<%= shortURL %>" style="font-size:15px;">Edit/Show</a>
         </form>
       <% }); %>

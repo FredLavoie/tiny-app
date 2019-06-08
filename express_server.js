@@ -276,9 +276,7 @@ app.post("/login", (request, response) => {
   let userPassword = request.body.password;
   let userId = mod.getId(userEmail);
   let checkedEmail = mod.emailChecker(userEmail);
-  console.log(checkedEmail);
   
-
   let members = fs.readFileSync('_users.json', 'utf-8');
   let _users = JSON.parse(members);
 
