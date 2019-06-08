@@ -33,28 +33,36 @@ function generateRandomString() {
 
 // check if email exists in 'users' database
 function emailChecker(email) {
-  let members = fs.readFileSync('_users.json', 'utf-8');
-  let _users = JSON.parse(members);
-
-  for (let entry in _users) {
-    let existingEmail = _users[entry].email;
-    if (email === existingEmail) {
-      return true;
+  fs.readFile('_users.json', 'utf-8', function(error, members){
+    if (error) {
+      console.log(error);
     }
-  }
-  return false;
+    let _users = JSON.parse(members);
+  
+    for (let entry in _users) {
+      let existingEmail = _users[entry].email;
+      if (email === existingEmail) {
+        return true;
+      }
+    }
+    return false;
+  });
 }
 
 // retreive 'id' from 'users' database using 'email' as input
 function getId(email) {
-  let members = fs.readFileSync('_users.json', 'utf-8');
-  let _users = JSON.parse(members);
-
-  for (let key in _users) {
-    if (_users[key].email === email) {
-      return _users[key].id;
+  fs.readFile('_users.json', 'utf-8', function(error, members){
+    if (error) {
+      console.log(error);
     }
-  }
+    let _users = JSON.parse(members);
+  
+    for (let key in _users) {
+      if (_users[key].email === email) {
+        return _users[key].id;
+      }
+    }
+  });
 }
 
 // create array of all shortURL that belong to specific user using 'id' as input
@@ -93,32 +101,52 @@ function shortURLcount(url) {
 // get count of shortURL - file I/O
 function getCount(url) {
   
-  let data = fs.readFileSync('shortURLcount.json', 'utf-8');
-  let array = JSON.parse(data);
-  
-  for(let entry of array) {
-    if (entry.url == url) {       
-      return entry.count;
+  fs.readFile('shortURLcount.json', 'utf-8', function(error, data){
+    if (error) {
+      console.log(error);
     }
-  }
+    let array = JSON.parse(data);
+    
+    for(let entry of array) {
+      if (entry.url == url) {       
+        return entry.count;
+      }
+    }
+  });
 }
 
 // add link to shortURL - file I/O
 function addURL(url) {
   
   let newObj = { url: url, count: 0 };
-  let data = fs.readFileSync('shortURLcount.json', 'utf-8');
-  let array = JSON.parse(data);
-
-  array.push(newObj);
-  let updatedArray = JSON.stringify(array);
-  fs.writeFileSync('shortURLcount.json', updatedArray);
+  fs.readFile('shortURLcount.json', 'utf-8', function(error, data){
+    if (error) {
+      console.log(error);
+    }
+    let array = JSON.parse(data);
+  
+    array.push(newObj);
+    let updatedArray = JSON.stringify(array);
+    fs.writeFileSync('shortURLcount.json', updatedArray);
+  });
 }
 
 // add link to shortURL - file I/O
-function deleteAllURL(url){
+function deleteAllURL(del_id){
+  fs.readFile('_urlDatabase.json', 'utf-8', function(error, data){
+    if (error) {
+      console.log(error);
+    }
+    let allURL = JSON.parse(data);
 
-
+    for(let entry in allURL) {
+      if(allURL[entry].userId == del_id){
+        delete allURL[entry];
+      }
+    }
+    let updatedURL = JSON.stringify(allURL);
+    fs.writeFileSync('_urlDatabase.json', updatedURL);
+  });
 }
 
 /**************************************************** SERVER - GET ********************************************************/
@@ -129,17 +157,24 @@ app.get("/", (request, response) => {
   if (request.session.user_id == null) {
     response.render("urls_login");
   } else {
-    let members = fs.readFileSync('_users.json', 'utf-8');
-    let _users = JSON.parse(members);
-    let id = request.session.user_id;
-    let email = _users[id].email;
-    let shortURLArray = urlsForUser(id);
-    
-    let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
-    let _urlDatabase = JSON.parse(data);
-
-    let templateVars = { urls: _urlDatabase, email: email, array: shortURLArray };    
-    response.render("urls_index", templateVars);
+    fs.readFile('_users.json', 'utf-8', function(error, members){
+      if (error) {
+        console.log(error);
+      }
+      let _users = JSON.parse(members);
+      let id = request.session.user_id;
+      let email = _users[id].email;
+      let shortURLArray = urlsForUser(id);
+      
+      fs.readFile('_urlDatabase.json', 'utf-8', function(error, data){
+        if (error) {
+          console.log(error);
+        }
+        let _urlDatabase = JSON.parse(data);
+        let templateVars = { urls: _urlDatabase, email: email, array: shortURLArray };    
+        response.render("urls_index", templateVars);
+      });
+    });
   }
 });
 
@@ -160,17 +195,25 @@ app.get("/urls", (request, response) => {
   if (request.session.user_id == null) {
     response.render("urls_login");
   } else {
-    let members = fs.readFileSync('_users.json', 'utf-8');
-    let _users = JSON.parse(members);
-    let id = request.session.user_id;
-    let email = _users[id].email;
-    let shortURLArray = urlsForUser(id);
-
-    let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
-    let _urlDatabase = JSON.parse(data);
-
-    let templateVars = { urls: _urlDatabase, email: email, array: shortURLArray };    
-    response.render("urls_index", templateVars);
+    fs.readFile('_users.json', 'utf-8', function(error, members){
+      if (error) {
+        console.log(error);
+      }
+      let _users = JSON.parse(members);
+      let id = request.session.user_id;
+      let email = _users[id].email;
+      let shortURLArray = urlsForUser(id);
+  
+      fs.readFile('_urlDatabase.json', 'utf-8', function(error, data){
+        if (error) {
+          console.log(error);
+        }
+        let _urlDatabase = JSON.parse(data);
+    
+        let templateVars = { urls: _urlDatabase, email: email, array: shortURLArray };    
+        response.render("urls_index", templateVars);
+      });
+    });
   }
 });
 
@@ -179,12 +222,16 @@ app.get("/urls/new", (request, response) => {
   if (request.session.user_id == null) {
     response.render("urls_login");
   } else {
-    let members = fs.readFileSync('_users.json', 'utf-8');
-    let _users = JSON.parse(members);
-    let id = request.session.user_id;
-    let email = _users[id].email;
-    let templateVars = { email: email };
-    response.render("urls_new", templateVars);
+    fs.readFile('_users.json', 'utf-8', function(error, members){
+      if (error) {
+        console.log(error);
+      }
+      let _users = JSON.parse(members);
+      let id = request.session.user_id;
+      let email = _users[id].email;
+      let templateVars = { email: email };
+      response.render("urls_new", templateVars);
+    });
   }
 });
 
@@ -194,15 +241,19 @@ app.get("/u/:shortURL", (request, response) => {
   shortURLcount(shortURL);
   let long = '';
 
-  let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
-  let _urlDatabase = JSON.parse(data);
-
-  for (let key in _urlDatabase) {
-    if (key === shortURL) {
-      long = _urlDatabase[key].longURL;
+  fs.readFile('_urlDatabase.json', 'utf-8', function(error, data){
+    if (error) {
+      console.log(error);
     }
-  }
-  response.redirect(long);
+    let _urlDatabase = JSON.parse(data);
+  
+    for (let key in _urlDatabase) {
+      if (key === shortURL) {
+        long = _urlDatabase[key].longURL;
+      }
+    }
+    response.redirect(long);
+  });
 });
 
 // [#SHORT-URL] adds shorturl and longurl to 'urlDatabase' object on submit
@@ -211,28 +262,37 @@ app.get("/urls/:shortURL", (request, response) => {
   if (request.session.user_id == null) { // if not logged in, can't edit urls
     response.render("urls_login");
   }
-  let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
-  let _urlDatabase = JSON.parse(data);
-
-  let loggedUser = request.session.user_id;
-  let urlUserId = _urlDatabase[request.params.shortURL].userId;
-
-  if (loggedUser !== urlUserId) { // user prevented from accessing other user urls
-    response.status(403).send("<h3>Press back to return to your TinyURLs (error: unauthorized access)</h3>");
-  } else {
-    let num = getCount(request.params.shortURL);
-    let members = fs.readFileSync('_users.json', 'utf-8');
-    let _users = JSON.parse(members);
-
-    let templateVars = {
-      shortURL: request.params.shortURL,
-      longURL: _urlDatabase[request.params.shortURL].longURL,
-      email: _users[request.session.user_id].email,
-      count: num,
-    };
+  fs.readFile('_urlDatabase.json', 'utf-8', function(error, data){
+    if (error) {
+      console.log(error);
+    }
+    let _urlDatabase = JSON.parse(data);
+  
+    let loggedUser = request.session.user_id;
+    let urlUserId = _urlDatabase[request.params.shortURL].userId;
+  
+    if (loggedUser !== urlUserId) { // user prevented from accessing other user urls
+      response.status(403).send("<h3>Press back to return to your TinyURLs (error: unauthorized access)</h3>");
+    } else {
+      let num = getCount(request.params.shortURL);
+      fs.readFile('_users.json', 'utf-8', function(error, members){
+        if (error) {
+          console.log(error);
+        }
+        let _users = JSON.parse(members);
     
-    response.render("urls_show", templateVars);
-  }
+        let templateVars = {
+          shortURL: request.params.shortURL,
+          longURL: _urlDatabase[request.params.shortURL].longURL,
+          email: _users[request.session.user_id].email,
+          count: num,
+        };
+        
+        response.render("urls_show", templateVars);
+      });
+    }
+  });
+
 });
 
 /**************************************************** SERVER - POST *******************************************************/
@@ -297,6 +357,8 @@ app.post("/delete", (request, response) => {
     }     
     let _users = JSON.parse(members);
     let id = request.session.user_id;
+
+    deleteAllURL(id);
      
     delete _users[id];
     
