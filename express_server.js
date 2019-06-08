@@ -7,6 +7,7 @@ const bodyParser = require("body-parser"); // makes post request readable
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 const PORT = 8080; // default port 8080
+const mod = require("./functions.js");
 
 let app = express(); // app is the server
 app.use(bodyParser.urlencoded({extended: true}));
@@ -23,121 +24,6 @@ app.listen(PORT, () => {
   console.log(`tiny-app listening on port ${PORT}`);
 });
 
-/****************************************************** FUNCTIONS *********************************************************/
-/**************************************************************************************************************************/
-
-// generate unique string (used for user IDs and short URLs)
-function generateRandomString() {
-  return (Math.random() * 6).toString(36).substring(6);
-}
-
-// check if email exists in 'users' database
-function emailChecker(email) {
-  let members = fs.readFileSync('_users.json', 'utf-8');
-  let _users = JSON.parse(members);
-
-  for (let entry in _users) {
-    let existingEmail = _users[entry].email;
-    if (email == existingEmail) {
-      return true;
-    }
-  }
-  return false;
-}
-
-// retreive 'id' from 'users' database using 'email' as input
-function getId(email) {
-  let members = fs.readFileSync('_users.json', 'utf-8');
-  let _users = JSON.parse(members);
-
-  for (let key in _users) {
-    if (_users[key].email === email) {
-      return _users[key].id;
-    }
-  }
-  
-}
-
-// create array of all shortURL that belong to specific user using 'id' as input
-function urlsForUser(id) {
-  let userArray = [];
-  let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
-  let _urlDatabase = JSON.parse(data);
-  
-  for (let entry in _urlDatabase) {
-    if (_urlDatabase[entry].userId === id) {
-      userArray.push(entry);
-    }
-  }
-  return userArray;
-}
-
-// add to count in shortURL - file I/O
-function shortURLcount(url) {
-  
-  fs.readFile('shortURLcount.json', 'utf-8', function (error, data){
-    if (error) {
-      console.log(error);
-    }
-    let array = JSON.parse(data);
-    
-    for(let entry of array) {
-      if (entry.url === url) { 
-        entry.count += 1;
-        let update = JSON.stringify(array);
-        fs.writeFileSync('shortURLcount.json', update);
-      }
-    }
-  });  
-}
-
-// get count of shortURL - file I/O
-function getCount(url) {
-  
-  let data = fs.readFileSync('shortURLcount.json', 'utf-8');
-  let array = JSON.parse(data);
-  
-  for(let entry of array) {
-    if (entry.url == url) {       
-      return entry.count;
-    }
-  }
-}
-
-// add link to shortURL - file I/O
-function addURL(url) {
-  
-  let newObj = { url: url, count: 0 };
-  fs.readFile('shortURLcount.json', 'utf-8', function(error, data){
-    if (error) {
-      console.log(error);
-    }
-    let array = JSON.parse(data);
-  
-    array.push(newObj);
-    let updatedArray = JSON.stringify(array);
-    fs.writeFileSync('shortURLcount.json', updatedArray);
-  });
-}
-
-// delete all link to user being deleted - file I/O
-function deleteAllURL(del_id){
-  fs.readFile('_urlDatabase.json', 'utf-8', function(error, data){
-    if (error) {
-      console.log(error);
-    }
-    let allURL = JSON.parse(data);
-
-    for(let entry in allURL) {
-      if(allURL[entry].userId == del_id){
-        delete allURL[entry];
-      }
-    }
-    let updatedURL = JSON.stringify(allURL);
-    fs.writeFileSync('_urlDatabase.json', updatedURL);
-  });
-}
-
 /**************************************************** SERVER - GET ********************************************************/
 /**************************************************************************************************************************/
 
@@ -153,7 +39,7 @@ app.get("/", (request, response) => {
       let _users = JSON.parse(members);
       let id = request.session.user_id;
       let email = _users[id].email;
-      let shortURLArray = urlsForUser(id);
+      let shortURLArray = mod.urlsForUser(id);
       
       fs.readFile('_urlDatabase.json', 'utf-8', function(error, data){
         if (error) {
@@ -191,7 +77,7 @@ app.get("/urls", (request, response) => {
       let _users = JSON.parse(members);
       let id = request.session.user_id;
       let email = _users[id].email;
-      let shortURLArray = urlsForUser(id);
+      let shortURLArray = mod.urlsForUser(id);
   
       fs.readFile('_urlDatabase.json', 'utf-8', function(error, data){
         if (error) {
@@ -227,7 +113,7 @@ app.get("/urls/new", (request, response) => {
 // [#SHARE-LINK] redirect traffic of u/:shortURL to longURL
 app.get("/u/:shortURL", (request, response) => {
   let shortURL = request.params.shortURL;
-  shortURLcount(shortURL);
+  mod.shortURLcount(shortURL);
   let long = '';
 
   let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
@@ -261,7 +147,7 @@ app.get("/urls/:shortURL", (request, response) => {
     if (loggedUser !== urlUserId) { // user prevented from accessing other user urls
       response.status(403).send("<h3>Press back to return to your TinyURLs (error: unauthorized access)</h3>");
     } else {
-      let num = getCount(request.params.shortURL);
+      let num = mod.getCount(request.params.shortURL);
       fs.readFile('_users.json', 'utf-8', function(error, members){
         if (error) {
           console.log(error);
@@ -287,7 +173,7 @@ app.get("/urls/:shortURL", (request, response) => {
 
 // [#CREATE] generates a shortURL upon submitting longURL in form
 app.post("/urls", (request, response) => {
-  let newShortURL = generateRandomString();
+  let newShortURL = mod.generateRandomString();
   let id = request.session.user_id;
 
   fs.readFile('_urlDatabase.json', 'utf-8', function(error, data){
@@ -298,7 +184,7 @@ app.post("/urls", (request, response) => {
     let _urlDatabase = JSON.parse(data);
   
     _urlDatabase[newShortURL] = { userId: id, longURL: request.body.longURL };
-    addURL(newShortURL);
+    mod.addURL(newShortURL);
     
     let updatedDatabase = JSON.stringify(_urlDatabase);
 
@@ -345,7 +231,7 @@ app.post("/delete", (request, response) => {
     let _users = JSON.parse(members);
     let id = request.session.user_id;
 
-    deleteAllURL(id);
+    mod.deleteAllURL(id);
      
     delete _users[id];
     
@@ -373,8 +259,12 @@ app.post("/urls/:shortURL", (request, response) => {
       let _urlDatabase = JSON.parse(data);
       _urlDatabase[request.params.shortURL].longURL = request.body.longURL;
       let updatedDatabase = JSON.stringify(_urlDatabase);
-      fs.writeFile('_urlDatabase.json', updatedDatabase);
-      response.redirect("/urls");
+      fs.writeFile('_urlDatabase.json', updatedDatabase, function(error){
+        if (error) {
+          console.log(error);
+        }
+        response.redirect("/urls");
+      });
     });
     
   }
@@ -384,8 +274,8 @@ app.post("/urls/:shortURL", (request, response) => {
 app.post("/login", (request, response) => {
   let userEmail = request.body.email;
   let userPassword = request.body.password;
-  let userId = getId(userEmail);
-  let checkedEmail = emailChecker(userEmail);
+  let userId = mod.getId(userEmail);
+  let checkedEmail = mod.emailChecker(userEmail);
   console.log(checkedEmail);
   
 
@@ -416,7 +306,7 @@ app.post("/logout", (request, response) => {
 app.post("/register", (request, response) => {
   let userEmail = request.body.email;
   let userPassword = request.body.password;
-  let checkedEmail = emailChecker(userEmail);
+  let checkedEmail = mod.emailChecker(userEmail);
 
   if (!userEmail || !userPassword) {
     response.status(400).send("<h3>Press back and enter email and password (error: blank input field)</h3>");
@@ -430,7 +320,7 @@ app.post("/register", (request, response) => {
       
       let _users = JSON.parse(members);
   
-      let newId = generateRandomString();
+      let newId = mod.generateRandomString();
       let newUser = { id: newId, email: '', password: '' };
       _users[newId] = newUser;
       _users[newId].email = userEmail;
