@@ -184,8 +184,7 @@ app.get("/urls/:shortURL", (request, response) => {
     response.status(403).send("<h3>Press back to return to your TinyURLs (error: unauthorized access)</h3>");
   } else {
     let num = getCount(request.params.shortURL);
-    console.log(num);
-    
+        
     let templateVars = {
       shortURL: request.params.shortURL,
       longURL: urlDatabase[request.params.shortURL].longURL,
