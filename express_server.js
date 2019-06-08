@@ -19,15 +19,6 @@ app.use(cookieSession({
 /***************************************************** DATABASES **********************************************************/
 /**************************************************************************************************************************/
 
-const urlDatabase = {
-  '9sm5xK': {userId: 'bgxuc7', longURL: 'http://www.google.com'},
-  'b2xVn2': {userId: 'bgxuc7', longURL: 'http://www.lighthouselabs.ca'},
-  'ef45g5g': {userId: 'iw5ltek', longURL: 'http://www.google.ca'},
-  'hjk88k': {userId: 'bgxuc7', longURL: 'http://www.github.com'},
-  'dfgh65674f': {userId: 'iw5ltek', longURL: 'https://github.com/FrancisBourgouin/lhl-w2d4/blob/master/index.js'},
-  'wert345er34': {userId: 'iw5ltek', longURL: 'https://getbootstrap.com/docs/4.1/components/buttons/'},
-};
-
 const users = {
   iw5ltek: {
     id: 'iw5ltek',
@@ -79,8 +70,11 @@ function getId(email) {
 // create array of all shortURL that belong to specific user using 'id' as input
 function urlsForUser(id) {
   let userArray = [];
-  for (let entry in urlDatabase) {
-    if (urlDatabase[entry].userId === id) {
+  let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
+  let _urlDatabase = JSON.parse(data);
+  
+  for (let entry in _urlDatabase) {
+    if (_urlDatabase[entry].userId === id) {
       userArray.push(entry);
     }
   }
@@ -142,7 +136,11 @@ app.get("/", (request, response) => {
     let id = request.session.user_id;
     let email = users[id].email;
     let shortURLArray = urlsForUser(id);
-    let templateVars = { urls: urlDatabase, email: email, array: shortURLArray };    
+    
+    let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
+    let _urlDatabase = JSON.parse(data);
+
+    let templateVars = { urls: _urlDatabase, email: email, array: shortURLArray };    
     response.render("urls_index", templateVars);
   }
 });
@@ -167,7 +165,11 @@ app.get("/urls", (request, response) => {
     let id = request.session.user_id;
     let email = users[id].email;
     let shortURLArray = urlsForUser(id);
-    let templateVars = { urls: urlDatabase, email: email, array: shortURLArray };    
+
+    let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
+    let _urlDatabase = JSON.parse(data);
+
+    let templateVars = { urls: _urlDatabase, email: email, array: shortURLArray };    
     response.render("urls_index", templateVars);
   }
 });
@@ -177,7 +179,9 @@ app.get("/urls/new", (request, response) => {
   if (request.session.user_id == null) {
     response.render("urls_login");
   } else {
-    let templateVars = { email: request.session.user_id };
+    let id = request.session.user_id;
+    let email = users[id].email;
+    let templateVars = { email: email };
     response.render("urls_new", templateVars);
   }
 });
@@ -187,9 +191,13 @@ app.get("/u/:shortURL", (request, response) => {
   let shortURL = request.params.shortURL;
   shortURLcount(shortURL);
   let long = '';
-  for (let key in urlDatabase) {
+
+  let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
+  let _urlDatabase = JSON.parse(data);
+
+  for (let key in _urlDatabase) {
     if (key === shortURL) {
-      long = urlDatabase[key].longURL;
+      long = _urlDatabase[key].longURL;
     }
   }
   response.redirect(long);
@@ -200,9 +208,12 @@ app.get("/urls/:shortURL", (request, response) => {
   
   if (request.session.user_id == null) { // if not logged in, can't edit urls
     response.render("urls_login");
-  }  
+  }
+  let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
+  let _urlDatabase = JSON.parse(data);
+
   let loggedUser = request.session.user_id;
-  let urlUserId = urlDatabase[request.params.shortURL].userId;
+  let urlUserId = _urlDatabase[request.params.shortURL].userId;
 
   if (loggedUser !== urlUserId) { // user prevented from accessing other user urls
     response.status(403).send("<h3>Press back to return to your TinyURLs (error: unauthorized access)</h3>");
@@ -211,7 +222,7 @@ app.get("/urls/:shortURL", (request, response) => {
         
     let templateVars = {
       shortURL: request.params.shortURL,
-      longURL: urlDatabase[request.params.shortURL].longURL,
+      longURL: _urlDatabase[request.params.shortURL].longURL,
       email: users[request.session.user_id].email,
       count: num,
     };
@@ -227,8 +238,16 @@ app.get("/urls/:shortURL", (request, response) => {
 app.post("/urls", (request, response) => {
   let newShortURL = generateRandomString();
   let id = request.session.user_id;
-  urlDatabase[newShortURL] = { userId: id, longURL: request.body.longURL };
+
+  let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
+  let _urlDatabase = JSON.parse(data);
+
+  _urlDatabase[newShortURL] = { userId: id, longURL: request.body.longURL };
   addURL(newShortURL);
+  
+  let updatedDatabase = JSON.stringify(_urlDatabase);
+  fs.writeFileSync('_urlDatabase.json', updatedDatabase);
+
   response.redirect("urls/" + newShortURL);
 });
 
@@ -237,7 +256,13 @@ app.post("/urls/:shortURL/delete", (request, response) => {
   if (request.session.user_id == null) {
     response.render("urls_login");
   } else {
-    delete urlDatabase[request.params.shortURL];
+    let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
+    let _urlDatabase = JSON.parse(data);
+
+    delete _urlDatabase[request.params.shortURL];
+    let updatedDatabase = JSON.stringify(_urlDatabase);
+    fs.writeFileSync('_urlDatabase.json', updatedDatabase);
+
     response.redirect("/urls");
   }
 });
@@ -247,7 +272,11 @@ app.post("/urls/:shortURL", (request, response) => {
   if (request.session.user_id == null) {
     response.render("urls_login");
   } else {
-    urlDatabase[request.params.shortURL].longURL = request.body.longURL;
+    let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
+    let _urlDatabase = JSON.parse(data);
+    _urlDatabase[request.params.shortURL].longURL = request.body.longURL;
+    let updatedDatabase = JSON.stringify(_urlDatabase);
+    fs.writeFileSync('_urlDatabase.json', updatedDatabase);
     response.redirect("/urls");
   }
 });
