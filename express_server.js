@@ -33,36 +33,29 @@ function generateRandomString() {
 
 // check if email exists in 'users' database
 function emailChecker(email) {
-  fs.readFile('_users.json', 'utf-8', function(error, members){
-    if (error) {
-      console.log(error);
+  let members = fs.readFileSync('_users.json', 'utf-8');
+  let _users = JSON.parse(members);
+
+  for (let entry in _users) {
+    let existingEmail = _users[entry].email;
+    if (email == existingEmail) {
+      return true;
     }
-    let _users = JSON.parse(members);
-  
-    for (let entry in _users) {
-      let existingEmail = _users[entry].email;
-      if (email === existingEmail) {
-        return true;
-      }
-    }
-    return false;
-  });
+  }
+  return false;
 }
 
 // retreive 'id' from 'users' database using 'email' as input
 function getId(email) {
-  fs.readFile('_users.json', 'utf-8', function(error, members){
-    if (error) {
-      console.log(error);
+  let members = fs.readFileSync('_users.json', 'utf-8');
+  let _users = JSON.parse(members);
+
+  for (let key in _users) {
+    if (_users[key].email === email) {
+      return _users[key].id;
     }
-    let _users = JSON.parse(members);
+  }
   
-    for (let key in _users) {
-      if (_users[key].email === email) {
-        return _users[key].id;
-      }
-    }
-  });
 }
 
 // create array of all shortURL that belong to specific user using 'id' as input
@@ -101,18 +94,14 @@ function shortURLcount(url) {
 // get count of shortURL - file I/O
 function getCount(url) {
   
-  fs.readFile('shortURLcount.json', 'utf-8', function(error, data){
-    if (error) {
-      console.log(error);
+  let data = fs.readFileSync('shortURLcount.json', 'utf-8');
+  let array = JSON.parse(data);
+  
+  for(let entry of array) {
+    if (entry.url == url) {       
+      return entry.count;
     }
-    let array = JSON.parse(data);
-    
-    for(let entry of array) {
-      if (entry.url == url) {       
-        return entry.count;
-      }
-    }
-  });
+  }
 }
 
 // add link to shortURL - file I/O
@@ -131,7 +120,7 @@ function addURL(url) {
   });
 }
 
-// add link to shortURL - file I/O
+// delete all link to user being deleted - file I/O
 function deleteAllURL(del_id){
   fs.readFile('_urlDatabase.json', 'utf-8', function(error, data){
     if (error) {
@@ -241,19 +230,17 @@ app.get("/u/:shortURL", (request, response) => {
   shortURLcount(shortURL);
   let long = '';
 
-  fs.readFile('_urlDatabase.json', 'utf-8', function(error, data){
-    if (error) {
-      console.log(error);
+  let data = fs.readFileSync('_urlDatabase.json', 'utf-8');
+   
+  let _urlDatabase = JSON.parse(data);
+
+  for (let key in _urlDatabase) {
+    if (key === shortURL) {
+      long = _urlDatabase[key].longURL;
     }
-    let _urlDatabase = JSON.parse(data);
+  }
+  response.redirect(long);
   
-    for (let key in _urlDatabase) {
-      if (key === shortURL) {
-        long = _urlDatabase[key].longURL;
-      }
-    }
-    response.redirect(long);
-  });
 });
 
 // [#SHORT-URL] adds shorturl and longurl to 'urlDatabase' object on submit
@@ -395,15 +382,19 @@ app.post("/urls/:shortURL", (request, response) => {
 
 // [#LOGIN] create cookie for user name entered by user in form
 app.post("/login", (request, response) => {
-  let members = fs.readFileSync('_users.json', 'utf-8');
-  let _users = JSON.parse(members);
   let userEmail = request.body.email;
   let userPassword = request.body.password;
   let userId = getId(userEmail);
+  let checkedEmail = emailChecker(userEmail);
+  console.log(checkedEmail);
+  
+
+  let members = fs.readFileSync('_users.json', 'utf-8');
+  let _users = JSON.parse(members);
 
   if (!userEmail || !userPassword) {
     response.status(400).send("<h3>Press back and enter email and password (error: blank input field)</h3>");
-  } else if (emailChecker(userEmail) === false) {
+  } else if (checkedEmail === false) {
     response.status(403).send("<h3>Press back and enter your email and password (error: user not found)</h3>");
   } else if (bcrypt.compareSync(userPassword, _users[userId].password) === true && _users[userId].email == userEmail) {
     request.session.user_id = userId;
@@ -411,6 +402,7 @@ app.post("/login", (request, response) => {
   } else {
     response.status(403).send("<h3>Press back and re-enter email and password (error: wrong email and/or password)</h3>");
   }
+  
 
 });
 
@@ -424,10 +416,11 @@ app.post("/logout", (request, response) => {
 app.post("/register", (request, response) => {
   let userEmail = request.body.email;
   let userPassword = request.body.password;
+  let checkedEmail = emailChecker(userEmail);
 
   if (!userEmail || !userPassword) {
     response.status(400).send("<h3>Press back and enter email and password (error: blank input field)</h3>");
-  } else if (emailChecker(userEmail) === true) {
+  } else if (checkedEmail === true) {
     response.status(400).send("<h3>Press back and enter new email and password (error: user already exists)</h3>");
   } else {
     fs.readFile('_users.json', 'utf-8', function(error, members){
