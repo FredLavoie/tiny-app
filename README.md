@@ -28,33 +28,31 @@ The [bcrypt.js](https://www.npmjs.com/package/bcrypt) node module is used during
 
 In order to use TinyApp, you must first clone the project to your local machine.
 
-Once the project is cloned, head over to your bash terminal and isntall the dependencies (listed below) using the following command:
+Once the project is cloned, head over to your bash terminal and install the dependencies (listed below) using the following command:
 
 ```
 npm install <module name>
 ```
 
-Once all the dependencies are installed, type the following command:
+Once all the dependencies are installed, type the following command to get the server started:
 
 ```
 node express_server.js
 ```
 
-You should get a message saying:
+You should get a message in terminal saying:
 ```
 tiny-app listening on port 8080
 ```
 
 Now head over to your web browser of choice <em>cough [FireFox](https://www.mozilla.org/en-US/firefox/new/) cough</em> and navigate to <strong><localhost:8080/register></strong>.
 
-Simply create an account and start shortening some URLs and share then with the world!
+Simply create an account to start shortening URLs and share them with the world!
 
-Alternatively, you can use ol' Joe's credentials to see what he's got going on with his links.
-
-##### (`joe@gmail.com`, 123456)
+(Alternatively, you can use ol' Joe's credentials to see what he's got going on with his links: `joe@gmail.com`, 123456)
 
 
-to share links, copy the "Shareable link".
+to share a link, copy the "Shareable link".
 
 enjoy!
 
