@@ -14,14 +14,14 @@ The [bcrypt.js](https://www.npmjs.com/package/bcrypt) node module is used during
 ### Login
 <img src="./screenshots/login.png" width="800">
 
+### User index/home
+<img src="./screenshots/index.png" width="800">
+
 ### Create a new short URL
 <img src="./screenshots/create-new.png" width="800">
 
 ### Show a URL
 <img src="./screenshots/show-link.png" width="800">
-
-### User index/home
-<img src="./screenshots/index.png" width="800">
 
 
 ## Getting Started
@@ -47,7 +47,7 @@ tiny-app listening on port 8080
 
 Now head over to your web browser of choice <em>cough [FireFox](https://www.mozilla.org/en-US/firefox/new/) cough</em> and navigate to <strong><localhost:8080/register></strong>.
 
-Now simply create an account and start shortening some URLs and share then with the world!
+Simply create an account and start shortening some URLs and share then with the world!
 
 Alternatively, you can use ol' Joe's credentials to see what he's got going on with his links.
 
