@@ -55,7 +55,7 @@ function urlsForUser(id) {
 // add to count in shortURL - file I/O
 function shortURLcount(url) {
   
-  fs.readFile('shortURLcount.json', 'utf-8', function (error, data){
+  fs.readFile('_shortURLcount.json', 'utf-8', function (error, data){
     if (error) {
       console.log(error);
     }
@@ -65,7 +65,7 @@ function shortURLcount(url) {
       if (entry.url === url) { 
         entry.count += 1;
         let update = JSON.stringify(array);
-        fs.writeFileSync('shortURLcount.json', update);
+        fs.writeFileSync('_shortURLcount.json', update);
       }
     }
   });  
@@ -74,7 +74,7 @@ function shortURLcount(url) {
 // get count of shortURL - file I/O
 function getCount(url) {
   
-  let data = fs.readFileSync('shortURLcount.json', 'utf-8');
+  let data = fs.readFileSync('_shortURLcount.json', 'utf-8');
   let array = JSON.parse(data);
   
   for(let entry of array) {
@@ -88,7 +88,7 @@ function getCount(url) {
 function addURL(url) {
   
   let newObj = { url: url, count: 0 };
-  fs.readFile('shortURLcount.json', 'utf-8', function(error, data){
+  fs.readFile('_shortURLcount.json', 'utf-8', function(error, data){
     if (error) {
       console.log(error);
     }
@@ -96,7 +96,7 @@ function addURL(url) {
   
     array.push(newObj);
     let updatedArray = JSON.stringify(array);
-    fs.writeFileSync('shortURLcount.json', updatedArray);
+    fs.writeFileSync('_shortURLcount.json', updatedArray);
   });
 }
 

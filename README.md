@@ -45,7 +45,7 @@ You should get a message saying:
 tiny-app listening on port 8080
 ```
 
-Now head over to your web browser of choice <em>cough [FireFox](https://www.mozilla.org/en-US/firefox/new/) cough</em> and navigate to <localhost:8080/register>.
+Now head over to your web browser of choice <em>cough [FireFox](https://www.mozilla.org/en-US/firefox/new/) cough</em> and navigate to <strong><localhost:8080/register></strong>.
 
 Now simply create an account and start shortening some URLs and share then with the world!
 
