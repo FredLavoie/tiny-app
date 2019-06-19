@@ -4,8 +4,7 @@
   "description": "URL shortening app",
   "main": "express_server.js",
   "scripts": {
-    "start": "./node_modules/.bin/nodemon -L ./server/express_server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server/express_server.js"
   },
   "author": "FredLavoie",
   "license": "ISC",
