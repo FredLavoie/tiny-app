@@ -6,7 +6,7 @@ const express = require('express');
 const bodyParser = require('body-parser'); // makes post request readable
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
-const PORT = 8080; // default port 8080
+const PORT = process.env.PORT || 8080; // default port 8080
 const mod = require('./functions.js');
 
 let app = express(); // app is the server
