@@ -1,5 +1,7 @@
 # TinyApp
 
+TinyApp is available on Heroku at: <https://tiny-app-fredlavoie.herokuapp.com/>
+
 TinyApp is a simple and easy to use link(URL) shortener application similar to bitly.com and goo.gl. Creating short links allows you to share them more easily with friends and family. By signing up with TinyApp, you can save the links you create so you always have access to them. The links you create track the number of times your shared links have been clicked on.
 
 TinyApp is a full stack web application built using [Node.js](https://nodejs.org) and [Expressjs](https://expressjs.com/), (a node.js framework) for the back-end server, HTML, [EJS](https://ejs.co/) Embedded javaScript Templates and the [Bootstrap](https://getbootstrap.com/) toolkit for the front-end. The databases are simple [JSON](https://json.org/) files. The server file uses the built-in node package [File System (fs)](https://nodejs.org/api/fs.html) to read and write the user profiles and the URLs databases.
