@@ -32,7 +32,7 @@ app.get('/', (request, response) => {
   if (request.session.user_id == null) {
     response.render('urls_login');
   } else {
-    fs.readFile('./database/_users.json', 'utf-8', function(error, members){
+    fs.readFile('database/_users.json', 'utf-8', function(error, members){
       if (error) {
         console.log(error);
       }
@@ -41,7 +41,7 @@ app.get('/', (request, response) => {
       let email = _users[id].email;
       let shortURLArray = mod.urlsForUser(id);
       
-      fs.readFile('./database/_urlDatabase.json', 'utf-8', function(error, data){
+      fs.readFile('database/_urlDatabase.json', 'utf-8', function(error, data){
         if (error) {
           console.log(error);
         }
@@ -70,7 +70,7 @@ app.get('/urls', (request, response) => {
   if (request.session.user_id == null) {
     response.render('urls_login');
   } else {
-    fs.readFile('./database/_users.json', 'utf-8', function(error, members){
+    fs.readFile('database/_users.json', 'utf-8', function(error, members){
       if (error) {
         console.log(error);
       }
@@ -79,7 +79,7 @@ app.get('/urls', (request, response) => {
       let email = _users[id].email;
       let shortURLArray = mod.urlsForUser(id);
   
-      fs.readFile('./database/_urlDatabase.json', 'utf-8', function(error, data){
+      fs.readFile('database/_urlDatabase.json', 'utf-8', function(error, data){
         if (error) {
           console.log(error);
         }
@@ -97,7 +97,7 @@ app.get('/urls/new', (request, response) => {
   if (request.session.user_id == null) {
     response.render('urls_login');
   } else {
-    fs.readFile('./database/_users.json', 'utf-8', function(error, members){
+    fs.readFile('database/_users.json', 'utf-8', function(error, members){
       if (error) {
         console.log(error);
       }
@@ -116,7 +116,7 @@ app.get('/u/:shortURL', (request, response) => {
   mod.shortURLcount(shortURL);
   let long = '';
 
-  let data = fs.readFileSync('./database/_urlDatabase.json', 'utf-8');
+  let data = fs.readFileSync('database/_urlDatabase.json', 'utf-8');
    
   let _urlDatabase = JSON.parse(data);
 
@@ -135,7 +135,7 @@ app.get('/urls/:shortURL', (request, response) => {
   if (request.session.user_id == null) { // if not logged in, can't edit urls
     response.render('urls_login');
   }
-  fs.readFile('./database/_urlDatabase.json', 'utf-8', function(error, data){
+  fs.readFile('database/_urlDatabase.json', 'utf-8', function(error, data){
     if (error) {
       console.log(error);
     }
@@ -148,7 +148,7 @@ app.get('/urls/:shortURL', (request, response) => {
       response.status(403).send('<h3>Press back to return to your TinyURLs (error: unauthorized access)</h3>');
     } else {
       let num = mod.getCount(request.params.shortURL);
-      fs.readFile('./database/_users.json', 'utf-8', function(error, members){
+      fs.readFile('database/_users.json', 'utf-8', function(error, members){
         if (error) {
           console.log(error);
         }
@@ -176,7 +176,7 @@ app.post('/urls', (request, response) => {
   let newShortURL = mod.generateRandomString();
   let id = request.session.user_id;
 
-  fs.readFile('./database/_urlDatabase.json', 'utf-8', function(error, data){
+  fs.readFile('database/_urlDatabase.json', 'utf-8', function(error, data){
     if (error) {
       console.log(error);
     }
@@ -188,7 +188,7 @@ app.post('/urls', (request, response) => {
     
     let updatedDatabase = JSON.stringify(_urlDatabase, null, 2);
 
-    fs.writeFile('./database/_urlDatabase.json', updatedDatabase, function(error){
+    fs.writeFile('database/_urlDatabase.json', updatedDatabase, function(error){
       if (error) {
         console.log(error);
       }
@@ -204,7 +204,7 @@ app.post('/urls/:shortURL/delete', (request, response) => {
   if (request.session.user_id == null) {
     response.render('urls_login');
   } else {
-    fs.readFile('./database/_urlDatabase.json', 'utf-8', function(error, data){
+    fs.readFile('database/_urlDatabase.json', 'utf-8', function(error, data){
       if (error) {
         console.log(error);
       }
@@ -212,7 +212,7 @@ app.post('/urls/:shortURL/delete', (request, response) => {
   
       delete _urlDatabase[request.params.shortURL];
       let updatedDatabase = JSON.stringify(_urlDatabase, null, 2);
-      fs.writeFile('./database/_urlDatabase.json', updatedDatabase, function(error){
+      fs.writeFile('database/_urlDatabase.json', updatedDatabase, function(error){
         if (error) {
           console.log(error);
         }
@@ -224,7 +224,7 @@ app.post('/urls/:shortURL/delete', (request, response) => {
 
 // [#DELETE-ACCOUNT] delete entry from 'users' object
 app.post('/delete', (request, response) => {
-  fs.readFile('./database/_users.json', 'utf-8', function(error, members){
+  fs.readFile('database/_users.json', 'utf-8', function(error, members){
     if (error) {
       console.log(error);
     }     
@@ -236,7 +236,7 @@ app.post('/delete', (request, response) => {
     delete _users[id];
     
     let updatedUsers = JSON.stringify(_users, null, 2);
-    fs.writeFile('./database/_users.json', updatedUsers, function(error){
+    fs.writeFile('database/_users.json', updatedUsers, function(error){
       if (error) {
         console.log(error);
       }
@@ -252,14 +252,14 @@ app.post('/urls/:shortURL', (request, response) => {
   if (request.session.user_id == null) {
     response.render('urls_login');
   } else {
-    fs.readFile('./database/_urlDatabase.json', 'utf-8', function(error, data){
+    fs.readFile('database/_urlDatabase.json', 'utf-8', function(error, data){
       if (error) {
         console.log(error);
       }
       let _urlDatabase = JSON.parse(data);
       _urlDatabase[request.params.shortURL].longURL = request.body.longURL;
       let updatedDatabase = JSON.stringify(_urlDatabase, null, 2);
-      fs.writeFile('./database/_urlDatabase.json', updatedDatabase, function(error){
+      fs.writeFile('database/_urlDatabase.json', updatedDatabase, function(error){
         if (error) {
           console.log(error);
         }
@@ -277,7 +277,7 @@ app.post('/login', (request, response) => {
   let userId = mod.getId(userEmail);
   let checkedEmail = mod.emailChecker(userEmail);
   
-  let members = fs.readFileSync('./database/_users.json', 'utf-8');
+  let members = fs.readFileSync('database/_users.json', 'utf-8');
   let _users = JSON.parse(members);
 
   if (!userEmail || !userPassword) {
@@ -311,7 +311,7 @@ app.post('/register', (request, response) => {
   } else if (checkedEmail === true) {
     response.status(400).send('<h3>Press back and enter new email and password (error: user already exists)</h3>');
   } else {
-    fs.readFile('./database/_users.json', 'utf-8', function(error, members){
+    fs.readFile('database/_users.json', 'utf-8', function(error, members){
       if (error) {
         console.log(error);
       }      
@@ -326,7 +326,7 @@ app.post('/register', (request, response) => {
       _users[newId].password = bcrypt.hashSync(pw, 10);
   
       let updatedUsers = JSON.stringify(_users, null, 2);
-      fs.writeFile('./database/_users.json', updatedUsers, function(error){
+      fs.writeFile('database/_users.json', updatedUsers, function(error){
         if (error) {
           console.log(error);
         }

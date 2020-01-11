@@ -14,22 +14,26 @@
     <header>
       <% include ./partials/_header %>
     </header>
-    <br>
-    <h3>Tiny URL for:</h3>
-    <h3 style="color:blueviolet;"><%= longURL %></h3>
-    <h4>Shareable link:</h4>
-    <H5 style="color:red;">localhost:8080/u/<%= shortURL %></H5>
-    <p>This link has been visited <%= count %> times</p>
-    <br>
-    <h4>Edit link:</h4>
-    <form method="POST" action="/urls/<%= shortURL %>" class="form-inline">
-      <div class="form-group mb-2"></div>
-        <input class="form-control" type="text" name="longURL" placeholder="http://" style="width: 400px; margin: 1em">
-        <div class="input-group-append">
-          <button type="submit" class="btn btn-warning" id="button-addon2">Update</button>
-        </div>
+
+    <main style="display: flex; justify-content: center; margin-top: 10%;">
+      <div>
+        <h3>Tiny URL for:</h3>
+        <h3 style="color:blueviolet;"><%= longURL %></h3>
+        <h4>Shareable link:</h4>
+        <a href="localhost:8080/u/<%= shortURL %>"><H5 style="color:red;">localhost:8080/u/<%= shortURL %></H5></a>
+        <p>This link has been visited <%= count %> times</p>
+        <br>
+        <h4>Edit link:</h4>
+        <form method="POST" action="/urls/<%= shortURL %>" class="form-inline">
+          <div class="form-group mb-2"></div>
+            <input class="form-control" type="text" name="longURL" value="<%= longURL %>" style="width: 30em;">
+            <div class="input-group-append">
+              <button type="submit" class="btn btn-warning" style="margin-left: 0.75em;" id="button-addon2">Update</button>
+            </div>
+          </div>
+        </form>
       </div>
-    </form>
+    </main>
       
     <!-- Bootsrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

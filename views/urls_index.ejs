@@ -9,26 +9,50 @@
     <title>TinyApp</title>
   </head>
 
-  <body style="font-size:20px; padding:50px;">
+  <body>
 
     <header>
       <% include ./partials/_header %>
     </header>
-    <br>
-    <h3>My URLs</h3>
-    <ul>
-      <% array.forEach(function(shortURL) { %>
-        <li><%= shortURL %> - <%= urls[shortURL].longURL %></li>
-        <form method="POST" action="/urls/<%= shortURL %>/delete">
-          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-          <a href="/urls/<%= shortURL %>" style="font-size:15px;">Edit/Show</a>
+    <main style="margin-top: 5%; margin-left: 1em; margin-right: 1em;">
+      <div>
+        <h3>My URLs</h3>
+        <table class="table">
+          <thread>
+            <tr>
+              <th scope="col">Short URL</th>
+              <th scope="col">Long URL</th>
+              <!-- <th scope="col">Visit count</th> -->
+              <th scope="col">Show</th>
+              <th scope="col">Delete</th>
+            </tr>
+          </thread>
+          <tbody>
+          <% array.forEach(function(shortURL) { %>
+            <tr>
+              <td><a href="localhost:8080/u/<%= shortURL %>" target="_blank"><%= shortURL %></a></td>
+              <td><%= urls[shortURL].longURL %></td>
+              <!-- <td><%= urls[shortURL].count %></td> -->
+              <td>
+                <form method="GET" action="/urls/<%= shortURL %>">
+                  <a href="/urls/<%= shortURL %>" style="font-size:15px;">Edit/Show</a>
+                </form>
+              </td>
+              <td>
+                <form method="POST" action="/urls/<%= shortURL %>/delete">
+                  <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+          </tbody>
+        </table>
+        <br>
+        <form method="POST" action="/delete">
+          <button type="submit" class="btn btn-danger btn-sm">Delete account</button>
         </form>
-      <% }); %>
-    </ul>
-
-    <footer>
-      <% include ./partials/_footer-delete %>
-    </footer>
+      </div>
+    </main>
 
     <!-- Bootsrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

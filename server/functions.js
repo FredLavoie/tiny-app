@@ -13,7 +13,7 @@ function generateRandomString() {
 
 // check if email exists in 'users' database
 function emailChecker(email) {
-  let members = fs.readFileSync('./database/_users.json', 'utf-8');
+  let members = fs.readFileSync('database/_users.json', 'utf-8');
   let _users = JSON.parse(members);
 
   for (let entry in _users) {
@@ -27,7 +27,7 @@ function emailChecker(email) {
 
 // retreive 'id' from 'users' database using 'email' as input
 function getId(email) {
-  let members = fs.readFileSync('./database/_users.json', 'utf-8');
+  let members = fs.readFileSync('database/_users.json', 'utf-8');
   let _users = JSON.parse(members);
 
   for (let key in _users) {
@@ -41,7 +41,7 @@ function getId(email) {
 // create array of all shortURL that belong to specific user using 'id' as input
 function urlsForUser(id) {
   let userArray = [];
-  let data = fs.readFileSync('./database/_urlDatabase.json', 'utf-8');
+  let data = fs.readFileSync('database/_urlDatabase.json', 'utf-8');
   let _urlDatabase = JSON.parse(data);
   
   for (let entry in _urlDatabase) {
@@ -55,7 +55,7 @@ function urlsForUser(id) {
 // add to count in shortURL - file I/O
 function shortURLcount(url) {
   
-  fs.readFile('/database/_shortURLcount.json', 'utf-8', function (error, data){
+  fs.readFile('database/_shortURLcount.json', 'utf-8', function (error, data){
     if (error) {
       console.log(error);
     }
@@ -65,7 +65,7 @@ function shortURLcount(url) {
       if (entry.url === url) { 
         entry.count += 1;
         let update = JSON.stringify(array, null, 2);
-        fs.writeFileSync('./database/_shortURLcount.json', update);
+        fs.writeFileSync('database/_shortURLcount.json', update);
       }
     }
   });  
@@ -74,7 +74,7 @@ function shortURLcount(url) {
 // get count of shortURL - file I/O
 function getCount(url) {
   
-  let data = fs.readFileSync('./database/_shortURLcount.json', 'utf-8');
+  let data = fs.readFileSync('database/_shortURLcount.json', 'utf-8');
   let array = JSON.parse(data);
   
   for(let entry of array) {
@@ -96,13 +96,13 @@ function addURL(url) {
   
     array.push(newObj);
     let updatedArray = JSON.stringify(array, null, 2);
-    fs.writeFileSync('./database/_shortURLcount.json', updatedArray);
+    fs.writeFileSync('database/_shortURLcount.json', updatedArray);
   });
 }
 
 // delete all link to user being deleted - file I/O
 function deleteAllURL(del_id){
-  fs.readFile('./database/_urlDatabase.json', 'utf-8', function(error, data){
+  fs.readFile('database/_urlDatabase.json', 'utf-8', function(error, data){
     if (error) {
       console.log(error);
     }
@@ -114,7 +114,7 @@ function deleteAllURL(del_id){
       }
     }
     let updatedURL = JSON.stringify(allURL, null, 2);
-    fs.writeFileSync('./database/_urlDatabase.json', updatedURL);
+    fs.writeFileSync('database/_urlDatabase.json', updatedURL);
   });
 }
 
