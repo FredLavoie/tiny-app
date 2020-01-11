@@ -5,16 +5,16 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
+      <div class="navbar-nav mr-auto">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
+      <form method="POST" class="form-inline" action="/logout">
+        <label class="navbar-text">Logged in as: <%= email %></label>
+        <button type="submit" class="btn btn-success">
+          <span>Logout</span>
+        </button>
+      </form>
     </div>
-    <form method="POST" class="form-inline" action="/logout" style="margin: 0 auto">
-      <label class="navbar-text" style="margin-right: 10px;">Logged in as: <%= email %></label>
-      <button type="submit" class="btn btn-success btn-md">
-        <span>Logout</span>
-      </button>
-    </form>
 	</nav>
 </header>
