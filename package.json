@@ -1,6 +1,6 @@
 {
   "name": "tiny-app",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "URL shortening app",
   "main": "express_server.js",
   "scripts": {
@@ -16,5 +16,9 @@
   },
   "devDependencies": {
     "nodemon": "^1.19.1"
+  },
+  "engines": {
+    "node": ">=8.0.0",
+    "npm": ">=6.0.0"
   }
 }
