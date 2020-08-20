@@ -12,7 +12,7 @@
   "author": "FredLavoie",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "2.0.0",
+    "bcrypt": "5.0.0",
     "cookie-session": "^1.3.3",
     "ejs": "^2.6.1",
     "express": "^4.17.1"
